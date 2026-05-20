@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 class PlayerInfo {
   final String name;
@@ -17,7 +19,7 @@ class PlayerInfo {
   });
 }
 
-class MatchDetailScreen extends StatelessWidget {
+class MatchDetailScreen extends StatefulWidget {
   final String homeTeam;
   final String awayTeam;
   final String? homeLogoUrl;
@@ -26,18 +28,30 @@ class MatchDetailScreen extends StatelessWidget {
   final String scoreText;
   final bool isLive;
   final String venue;
+  final bool isCricket;
+  final String? matchId;
 
   const MatchDetailScreen({
     super.key,
-    this.homeTeam = 'MUMBAI',
-    this.awayTeam = 'CHENNAI',
+    required this.homeTeam,
+    required this.awayTeam,
     this.homeLogoUrl,
     this.awayLogoUrl,
-    this.statusText = '● LIVE - 2nd Half',
-    this.scoreText = '2 - 1',
-    this.isLive = true,
-    this.venue = 'Wankhede Stadium',
+    required this.statusText,
+    required this.scoreText,
+    required this.isLive,
+    required this.venue,
+    this.isCricket = false,
+    this.matchId,
   });
+
+  @override
+  State<MatchDetailScreen> createState() => _MatchDetailScreenState();
+}
+
+class _MatchDetailScreenState extends State<MatchDetailScreen> {
+  bool _isLoadingScorecard = false;
+  Map<String, List<PlayerInfo>> _apiSquads = {};
 
   static const Map<String, List<PlayerInfo>> _teamSquads = {
     'arsenal': [
@@ -170,14 +184,186 @@ class MatchDetailScreen extends StatelessWidget {
       PlayerInfo(name: 'Anrich Nortje', role: 'Bowler', number: '20', nationality: 'South Africa', stats: 'Wickets: 7'),
       PlayerInfo(name: 'Khaleel Ahmed', role: 'Bowler', number: '90', nationality: 'India', stats: 'Wickets: 17, Econ: 9.3'),
     ],
+    'kolkata knight riders': [
+      PlayerInfo(name: 'Shreyas Iyer', role: 'Batter', number: '41', nationality: 'India', stats: 'Runs: 351, Strike Rate: 146.8'),
+      PlayerInfo(name: 'Phil Salt', role: 'Wicketkeeper', number: '21', nationality: 'England', stats: 'Runs: 435, SR: 182.0'),
+      PlayerInfo(name: 'Sunil Narine', role: 'All-Rounder', number: '74', nationality: 'West Indies', stats: 'Runs: 488, Wickets: 15'),
+      PlayerInfo(name: 'Venkatesh Iyer', role: 'Batter', number: '27', nationality: 'India', stats: 'Runs: 370, Avg: 41.1'),
+      PlayerInfo(name: 'Andre Russell', role: 'All-Rounder', number: '12', nationality: 'West Indies', stats: 'Runs: 222, Wickets: 16'),
+      PlayerInfo(name: 'Rinku Singh', role: 'Batter', number: '35', nationality: 'India', stats: 'Strike Rate: 148.6, Sixes: 15'),
+      PlayerInfo(name: 'Ramandeep Singh', role: 'All-Rounder', number: '19', nationality: 'India', stats: 'Strike Rate: 201.6'),
+      PlayerInfo(name: 'Mitchell Starc', role: 'Bowler', number: '56', nationality: 'Australia', stats: 'Wickets: 12, Econ: 9.0'),
+      PlayerInfo(name: 'Harshit Rana', role: 'Bowler', number: '28', nationality: 'India', stats: 'Wickets: 17, Econ: 9.1'),
+      PlayerInfo(name: 'Varun Chakaravarthy', role: 'Bowler', number: '29', nationality: 'India', stats: 'Wickets: 19, Econ: 8.1'),
+      PlayerInfo(name: 'Vaibhav Arora', role: 'Bowler', number: '14', nationality: 'India', stats: 'Wickets: 10'),
+    ],
+    'rajasthan royals': [
+      PlayerInfo(name: 'Yashasvi Jaiswal', role: 'Batter', number: '64', nationality: 'India', stats: 'Runs: 435, 100s: 1'),
+      PlayerInfo(name: 'Jos Buttler', role: 'Wicketkeeper', number: '63', nationality: 'England', stats: 'Runs: 359, 100s: 2'),
+      PlayerInfo(name: 'Sanju Samson', role: 'Batter', number: '8', nationality: 'India', stats: 'Runs: 531, Avg: 48.2'),
+      PlayerInfo(name: 'Riyan Parag', role: 'Batter', number: '12', nationality: 'India', stats: 'Runs: 567, Avg: 56.7'),
+      PlayerInfo(name: 'Shimron Hetmyer', role: 'Batter', number: '18', nationality: 'West Indies', stats: 'Strike Rate: 163.2'),
+      PlayerInfo(name: 'Dhruv Jurel', role: 'Batter', number: '21', nationality: 'India', stats: 'Runs: 195, SR: 138.5'),
+      PlayerInfo(name: 'Ravichandran Ashwin', role: 'All-Rounder', number: '99', nationality: 'India', stats: 'Wickets: 8, Econ: 8.3'),
+      PlayerInfo(name: 'Trent Boult', role: 'Bowler', number: '18', nationality: 'New Zealand', stats: 'Wickets: 14, Econ: 7.8'),
+      PlayerInfo(name: 'Avesh Khan', role: 'Bowler', number: '27', nationality: 'India', stats: 'Wickets: 13, Econ: 8.9'),
+      PlayerInfo(name: 'Sandeep Sharma', role: 'Bowler', number: '20', nationality: 'India', stats: 'Wickets: 11, Econ: 7.9'),
+      PlayerInfo(name: 'Yuzvendra Chahal', role: 'Bowler', number: '3', nationality: 'India', stats: 'Wickets: 15, Econ: 8.8'),
+    ],
+    'sunrisers hyderabad': [
+      PlayerInfo(name: 'Travis Head', role: 'Batter', number: '62', nationality: 'Australia', stats: 'Runs: 567, Strike Rate: 192.2'),
+      PlayerInfo(name: 'Abhishek Sharma', role: 'Batter', number: '4', nationality: 'India', stats: 'Runs: 482, Sixes: 41'),
+      PlayerInfo(name: 'Nitish Kumar Reddy', role: 'All-Rounder', number: '67', nationality: 'India', stats: 'Runs: 303, Wickets: 3'),
+      PlayerInfo(name: 'Heinrich Klaasen', role: 'Wicketkeeper', number: '45', nationality: 'South Africa', stats: 'Runs: 465, SR: 171.0'),
+      PlayerInfo(name: 'Abdul Samad', role: 'Batter', number: '1', nationality: 'India', stats: 'Strike Rate: 168.2'),
+      PlayerInfo(name: 'Shahbaz Ahmed', role: 'All-Rounder', number: '21', nationality: 'India', stats: 'Runs: 202, Wickets: 6'),
+      PlayerInfo(name: 'Pat Cummins', role: 'All-Rounder', number: '30', nationality: 'Australia', stats: 'Wickets: 17, Econ: 8.9'),
+      PlayerInfo(name: 'Bhuvneshwar Kumar', role: 'Bowler', number: '15', nationality: 'India', stats: 'Wickets: 11, Econ: 9.0'),
+      PlayerInfo(name: 'Jaydev Unadkat', role: 'Bowler', number: '46', nationality: 'India', stats: 'Wickets: 8, Econ: 9.3'),
+      PlayerInfo(name: 'Mayank Markande', role: 'Bowler', number: '11', nationality: 'India', stats: 'Wickets: 8'),
+      PlayerInfo(name: 'T Natarajan', role: 'Bowler', number: '44', nationality: 'India', stats: 'Wickets: 19, Econ: 9.0'),
+    ],
+    'gujarat titans': [
+      PlayerInfo(name: 'Shubman Gill', role: 'Batter', number: '7', nationality: 'India', stats: 'Runs: 426, Avg: 38.7'),
+      PlayerInfo(name: 'Sai Sudharsan', role: 'Batter', number: '23', nationality: 'India', stats: 'Runs: 527, Avg: 47.9'),
+      PlayerInfo(name: 'David Miller', role: 'Batter', number: '10', nationality: 'South Africa', stats: 'Runs: 268, SR: 151.0'),
+      PlayerInfo(name: 'Shahrukh Khan', role: 'Batter', number: '24', nationality: 'India', stats: 'Strike Rate: 165.4'),
+      PlayerInfo(name: 'Rahul Tewatia', role: 'All-Rounder', number: '20', nationality: 'India', stats: 'Runs: 188, SR: 145.0'),
+      PlayerInfo(name: 'Rashid Khan', role: 'All-Rounder', number: '19', nationality: 'Afghanistan', stats: 'Wickets: 10, Econ: 8.4'),
+      PlayerInfo(name: 'R Sai Kishore', role: 'Bowler', number: '8', nationality: 'India', stats: 'Wickets: 7, Econ: 9.1'),
+      PlayerInfo(name: 'Mohit Sharma', role: 'Bowler', number: '18', nationality: 'India', stats: 'Wickets: 13, Econ: 9.5'),
+      PlayerInfo(name: 'Umesh Yadav', role: 'Bowler', number: '70', nationality: 'India', stats: 'Wickets: 8'),
+      PlayerInfo(name: 'Spencer Johnson', role: 'Bowler', number: '45', nationality: 'Australia', stats: 'Wickets: 4'),
+      PlayerInfo(name: 'Noor Ahmad', role: 'Bowler', number: '15', nationality: 'Afghanistan', stats: 'Wickets: 8, Econ: 8.2'),
+    ],
+    'lucknow super giants': [
+      PlayerInfo(name: 'KL Rahul', role: 'Wicketkeeper', number: '1', nationality: 'India', stats: 'Runs: 520, Avg: 37.1'),
+      PlayerInfo(name: 'Devdutt Padikkal', role: 'Batter', number: '19', nationality: 'India', stats: 'Runs: 110'),
+      PlayerInfo(name: 'Marcus Stoinis', role: 'All-Rounder', number: '17', nationality: 'Australia', stats: 'Runs: 388, Wickets: 4'),
+      PlayerInfo(name: 'Nicholas Pooran', role: 'Batter', number: '29', nationality: 'West Indies', stats: 'Runs: 499, Sixes: 36'),
+      PlayerInfo(name: 'Deepak Hooda', role: 'Batter', number: '5', nationality: 'India', stats: 'Runs: 145'),
+      PlayerInfo(name: 'Ayush Badoni', role: 'Batter', number: '11', nationality: 'India', stats: 'Runs: 235, SR: 138.0'),
+      PlayerInfo(name: 'Krunal Pandya', role: 'All-Rounder', number: '25', nationality: 'India', stats: 'Wickets: 6, Econ: 7.2'),
+      PlayerInfo(name: 'Ravi Bishnoi', role: 'Bowler', number: '56', nationality: 'India', stats: 'Wickets: 10, Econ: 8.7'),
+      PlayerInfo(name: 'Naveen-ul-Haq', role: 'Bowler', number: '78', nationality: 'Afghanistan', stats: 'Wickets: 12, Econ: 8.8'),
+      PlayerInfo(name: 'Yash Thakur', role: 'Bowler', number: '34', nationality: 'India', stats: 'Wickets: 11'),
+      PlayerInfo(name: 'Mayank Yadav', role: 'Bowler', number: '23', nationality: 'India', stats: 'Wickets: 7, Econ: 6.9, Speed: 156kph'),
+    ],
+    'punjab kings': [
+      PlayerInfo(name: 'Prabhsimran Singh', role: 'Batter', number: '84', nationality: 'India', stats: 'Runs: 334, SR: 156.8'),
+      PlayerInfo(name: 'Jonny Bairstow', role: 'Batter', number: '51', nationality: 'England', stats: 'Runs: 298, 100s: 1'),
+      PlayerInfo(name: 'Rilee Rossouw', role: 'Batter', number: '99', nationality: 'South Africa', stats: 'Runs: 211, SR: 148.0'),
+      PlayerInfo(name: 'Shashank Singh', role: 'Batter', number: '25', nationality: 'India', stats: 'Runs: 354, Avg: 44.2'),
+      PlayerInfo(name: 'Jitesh Sharma', role: 'Wicketkeeper', number: '23', nationality: 'India', stats: 'Runs: 187, Catches: 12'),
+      PlayerInfo(name: 'Sam Curran', role: 'All-Rounder', number: '58', nationality: 'England', stats: 'Runs: 270, Wickets: 16'),
+      PlayerInfo(name: 'Ashutosh Sharma', role: 'Batter', number: '12', nationality: 'India', stats: 'Strike Rate: 189.2'),
+      PlayerInfo(name: 'Harpreet Brar', role: 'Bowler', number: '95', nationality: 'India', stats: 'Wickets: 8, Econ: 7.9'),
+      PlayerInfo(name: 'Harshal Patel', role: 'Bowler', number: '83', nationality: 'India', stats: 'Wickets: 24, Purple Cap'),
+      PlayerInfo(name: 'Rahul Chahar', role: 'Bowler', number: '2', nationality: 'India', stats: 'Wickets: 10'),
+      PlayerInfo(name: 'Arshdeep Singh', role: 'Bowler', number: '9', nationality: 'India', stats: 'Wickets: 19, Econ: 9.3'),
+    ],
+    'india': [
+      PlayerInfo(name: 'Rohit Sharma', role: 'Batter', number: '45', nationality: 'India', stats: 'T20I Runs: 4231, Avg: 32.1'),
+      PlayerInfo(name: 'Yashasvi Jaiswal', role: 'Batter', number: '64', nationality: 'India', stats: 'T20I Strike Rate: 161.4'),
+      PlayerInfo(name: 'Virat Kohli', role: 'Batter', number: '18', nationality: 'India', stats: 'T20I Runs: 4188, Avg: 48.7'),
+      PlayerInfo(name: 'Suryakumar Yadav', role: 'Batter', number: '63', nationality: 'India', stats: 'T20I Rank #1 Batter'),
+      PlayerInfo(name: 'Rishabh Pant', role: 'Wicketkeeper', number: '17', nationality: 'India', stats: 'Catches: 42, SR: 135.0'),
+      PlayerInfo(name: 'Hardik Pandya', role: 'All-Rounder', number: '33', nationality: 'India', stats: 'Runs: 1450, Wickets: 84'),
+      PlayerInfo(name: 'Ravindra Jadeja', role: 'All-Rounder', number: '8', nationality: 'India', stats: 'Wickets: 54, Econ: 7.1'),
+      PlayerInfo(name: 'Axar Patel', role: 'All-Rounder', number: '20', nationality: 'India', stats: 'Wickets: 49, Econ: 7.3'),
+      PlayerInfo(name: 'Kuldeep Yadav', role: 'Bowler', number: '23', nationality: 'India', stats: 'Wickets: 64, Avg: 16.2'),
+      PlayerInfo(name: 'Jasprit Bumrah', role: 'Bowler', number: '93', nationality: 'India', stats: 'Wickets: 89, Econ: 6.27'),
+      PlayerInfo(name: 'Arshdeep Singh', role: 'Bowler', number: '9', nationality: 'India', stats: 'Wickets: 79, Avg: 19.1'),
+    ],
+    'australia': [
+      PlayerInfo(name: 'Travis Head', role: 'Batter', number: '62', nationality: 'Australia', stats: 'Strike Rate: 147.8'),
+      PlayerInfo(name: 'David Warner', role: 'Batter', number: '31', nationality: 'Australia', stats: 'T20I Runs: 3277'),
+      PlayerInfo(name: 'Mitchell Marsh', role: 'All-Rounder', number: '8', nationality: 'Australia', stats: 'Captain, SR: 135.4'),
+      PlayerInfo(name: 'Glenn Maxwell', role: 'All-Rounder', number: '32', nationality: 'Australia', stats: 'T20I Hundreds: 5'),
+      PlayerInfo(name: 'Marcus Stoinis', role: 'All-Rounder', number: '17', nationality: 'Australia', stats: 'Strike Rate: 145.0'),
+      PlayerInfo(name: 'Tim David', role: 'Batter', number: '85', nationality: 'Australia', stats: 'Strike Rate: 162.5'),
+      PlayerInfo(name: 'Matthew Wade', role: 'Wicketkeeper', number: '13', nationality: 'Australia', stats: 'Catches: 58'),
+      PlayerInfo(name: 'Pat Cummins', role: 'Bowler', number: '30', nationality: 'Australia', stats: 'Wickets: 62, Econ: 7.8'),
+      PlayerInfo(name: 'Mitchell Starc', role: 'Bowler', number: '56', nationality: 'Australia', stats: 'Wickets: 76, Speed: 148kph'),
+      PlayerInfo(name: 'Adam Zampa', role: 'Bowler', number: '88', nationality: 'Australia', stats: 'Wickets: 98, Econ: 7.20'),
+      PlayerInfo(name: 'Josh Hazlewood', role: 'Bowler', number: '38', nationality: 'Australia', stats: 'Wickets: 61, Econ: 7.68'),
+    ]
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchScorecardIfNeeded();
+  }
+
+  Future<void> _fetchScorecardIfNeeded() async {
+    if (!widget.isCricket || widget.matchId == null) return;
+    
+    setState(() => _isLoadingScorecard = true);
+    try {
+      final response = await http.get(
+        Uri.parse('http://127.0.0.1:8000/api/cricket/match/${widget.matchId}/scorecard'),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success' && data['teams'] != null) {
+          final Map<String, dynamic> teamsData = data['teams'];
+          final Map<String, List<PlayerInfo>> loadedSquads = {};
+
+          teamsData.forEach((teamName, details) {
+            final List<dynamic> playersList = details['players'] ?? [];
+            loadedSquads[teamName.toLowerCase().trim()] = playersList.map((p) {
+              return PlayerInfo(
+                name: p['name'] ?? 'Unknown',
+                role: p['role'] ?? 'Player',
+                number: p['number']?.toString() ?? '0',
+                nationality: p['nationality'] ?? 'International',
+                stats: p['stats'] ?? '',
+              );
+            }).toList();
+          });
+
+          if (mounted) {
+            setState(() {
+              _apiSquads = loadedSquads;
+              _isLoadingScorecard = false;
+            });
+          }
+          return;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching live scorecard: $e');
+    }
+    if (mounted) {
+      setState(() => _isLoadingScorecard = false);
+    }
+  }
 
   List<PlayerInfo> _getSquadForTeam(String name) {
     final cleaned = name.toLowerCase().trim();
+
+    // Check if squad got fetched from Cricbuzz API live scorecard first
+    for (var key in _apiSquads.keys) {
+      if (key.contains(cleaned) || cleaned.contains(key)) {
+        return _apiSquads[key]!;
+      }
+    }
+
+    // Hardcoded fallback list
     if (cleaned == 'mi' || cleaned.contains('mumbai')) return _teamSquads['mumbai indians']!;
     if (cleaned == 'csk' || cleaned.contains('chennai')) return _teamSquads['chennai super kings']!;
     if (cleaned == 'rcb' || cleaned.contains('bengaluru') || cleaned.contains('bangalore')) return _teamSquads['royal challengers bengaluru']!;
     if (cleaned == 'dc' || cleaned.contains('delhi')) return _teamSquads['delhi capitals']!;
+    if (cleaned == 'kkr' || cleaned.contains('kolkata')) return _teamSquads['kolkata knight riders']!;
+    if (cleaned == 'rr' || cleaned.contains('rajasthan')) return _teamSquads['rajasthan royals']!;
+    if (cleaned == 'srh' || cleaned.contains('hyderabad')) return _teamSquads['sunrisers hyderabad']!;
+    if (cleaned == 'gt' || cleaned.contains('gujarat')) return _teamSquads['gujarat titans']!;
+    if (cleaned == 'lsg' || cleaned.contains('lucknow')) return _teamSquads['lucknow super giants']!;
+    if (cleaned == 'pbks' || cleaned == 'pk' || cleaned.contains('punjab')) return _teamSquads['punjab kings']!;
+    if (cleaned == 'ind' || cleaned == 'india') return _teamSquads['india']!;
+    if (cleaned == 'aus' || cleaned == 'australia') return _teamSquads['australia']!;
+
     if (cleaned.contains('real') || (cleaned.contains('madrid') && !cleaned.contains('atletico'))) return _teamSquads['real madrid']!;
     if (cleaned.contains('atletico')) return _teamSquads['atletico madrid']!;
     if (cleaned.contains('arsenal')) return _teamSquads['arsenal']!;
@@ -185,10 +371,10 @@ class MatchDetailScreen extends StatelessWidget {
     if (cleaned.contains('psg') || cleaned.contains('paris') || cleaned.contains('germain')) return _teamSquads['psg']!;
     if (cleaned.contains('athletic') || cleaned.contains('bilbao')) return _teamSquads['athletic club']!;
 
-    // Fallback generated squad based on whether it seems like a football match or cricket match
-    final isCricket = cleaned == 'mi' || cleaned == 'csk' || cleaned == 'rcb' || cleaned == 'dc' ||
+    // Fallback generated squad
+    final isCricket = widget.isCricket || cleaned == 'mi' || cleaned == 'csk' || cleaned == 'rcb' || cleaned == 'dc' ||
                       cleaned.contains('indians') || cleaned.contains('kings') || cleaned.contains('challengers') || cleaned.contains('capitals') ||
-                      (venue.toLowerCase().contains('stadium') && scoreText.contains('/'));
+                      (widget.venue.toLowerCase().contains('stadium') && widget.scoreText.contains('/'));
                       
     return List.generate(11, (index) {
       if (isCricket) {
@@ -239,11 +425,11 @@ class MatchDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          isLive ? 'LIVE MATCH' : 'UPCOMING MATCH',
+          widget.isLive ? 'LIVE MATCH' : 'UPCOMING MATCH',
           style: GoogleFonts.outfit(
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
-            color: isLive ? Colors.redAccent : const Color(0xFF00FF7F),
+            color: widget.isLive ? Colors.redAccent : const Color(0xFF00FF7F),
           ),
         ),
         centerTitle: true,
@@ -271,7 +457,7 @@ class MatchDetailScreen extends StatelessWidget {
         border: Border.all(color: Colors.grey[800]!),
         boxShadow: [
           BoxShadow(
-            color: isLive ? Colors.redAccent.withOpacity(0.1) : const Color(0xFF00FF7F).withOpacity(0.1),
+            color: widget.isLive ? Colors.redAccent.withOpacity(0.1) : const Color(0xFF00FF7F).withOpacity(0.1),
             blurRadius: 20,
             spreadRadius: 2,
           )
@@ -282,15 +468,15 @@ class MatchDetailScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: isLive 
+              color: widget.isLive 
                   ? Colors.redAccent.withOpacity(0.2) 
                   : const Color(0xFF00FF7F).withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              statusText,
+              widget.statusText,
               style: GoogleFonts.inter(
-                color: isLive ? Colors.redAccent : const Color(0xFF00FF7F), 
+                color: widget.isLive ? Colors.redAccent : const Color(0xFF00FF7F), 
                 fontWeight: FontWeight.bold, 
                 fontSize: 12
               ),
@@ -300,12 +486,12 @@ class MatchDetailScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildTeamLogo(homeTeam, homeTeam.isNotEmpty ? homeTeam[0] : '?', homeLogoUrl),
+              _buildTeamLogo(widget.homeTeam, widget.homeTeam.isNotEmpty ? widget.homeTeam[0] : '?', widget.homeLogoUrl),
               Expanded(
                 child: Column(
                   children: [
                     Text(
-                      scoreText,
+                      widget.scoreText,
                       style: GoogleFonts.outfit(
                         fontSize: 30,
                         fontWeight: FontWeight.w900,
@@ -315,14 +501,14 @@ class MatchDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      venue,
+                      widget.venue,
                       style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 12),
                       textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
-              _buildTeamLogo(awayTeam, awayTeam.isNotEmpty ? awayTeam[0] : '?', awayLogoUrl),
+              _buildTeamLogo(widget.awayTeam, widget.awayTeam.isNotEmpty ? widget.awayTeam[0] : '?', widget.awayLogoUrl),
             ],
           ),
         ],
@@ -398,7 +584,7 @@ class MatchDetailScreen extends StatelessWidget {
             ],
           ),
           SizedBox(
-            height: 480, // Expanded height for interactive list items
+            height: 480,
             child: TabBarView(
               children: [
                 _buildLineupsTab(context),
@@ -413,14 +599,22 @@ class MatchDetailScreen extends StatelessWidget {
   }
 
   Widget _buildLineupsTab(BuildContext context) {
-    final homeSquad = _getSquadForTeam(homeTeam);
-    final awaySquad = _getSquadForTeam(awayTeam);
+    if (_isLoadingScorecard) {
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00FF7F)),
+        ),
+      );
+    }
+
+    final homeSquad = _getSquadForTeam(widget.homeTeam);
+    final awaySquad = _getSquadForTeam(widget.awayTeam);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: _buildTeamList(context, '${homeTeam.toUpperCase()} XI', homeSquad)),
+        Expanded(child: _buildTeamList(context, '${widget.homeTeam.toUpperCase()} Squad', homeSquad)),
         Container(width: 1, color: Colors.grey[800]),
-        Expanded(child: _buildTeamList(context, '${awayTeam.toUpperCase()} XI', awaySquad)),
+        Expanded(child: _buildTeamList(context, '${widget.awayTeam.toUpperCase()} Squad', awaySquad)),
       ],
     );
   }
@@ -457,9 +651,9 @@ class MatchDetailScreen extends StatelessWidget {
                         radius: 12,
                         backgroundColor: const Color(0xFF1E1E1E),
                         child: Text(
-                          player.number,
+                          player.number.length > 3 ? '#' : player.number,
                           style: GoogleFonts.inter(
-                            fontSize: 9, 
+                            fontSize: player.number.length > 2 ? 7 : 9, 
                             color: const Color(0xFF00FF7F), 
                             fontWeight: FontWeight.bold
                           ),
@@ -502,10 +696,10 @@ class MatchDetailScreen extends StatelessWidget {
   }
 
   Widget _buildStatsTab() {
-    final cleaned = homeTeam.toLowerCase();
-    final isCricket = cleaned == 'mi' || cleaned == 'csk' || cleaned == 'rcb' || cleaned == 'dc' ||
+    final cleaned = widget.homeTeam.toLowerCase();
+    final isCricket = widget.isCricket || cleaned == 'mi' || cleaned == 'csk' || cleaned == 'rcb' || cleaned == 'dc' ||
                       cleaned.contains('indians') || cleaned.contains('kings') || cleaned.contains('challengers') || cleaned.contains('capitals') ||
-                      (venue.toLowerCase().contains('stadium') && scoreText.contains('/'));
+                      (widget.venue.toLowerCase().contains('stadium') && widget.scoreText.contains('/'));
 
     if (isCricket) {
       return ListView(
@@ -601,8 +795,8 @@ class MatchDetailScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(homeTeam, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
-                    Text(awayTeam, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                    Text(widget.homeTeam, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+                    Text(widget.awayTeam, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -646,7 +840,7 @@ class MatchDetailScreen extends StatelessWidget {
               border: Border.all(color: Colors.grey[800]!),
             ),
             child: Text(
-              'Based on recent games, $homeTeam shows high momentum in attack phase (average speed of transition is up by 14%). $awayTeam is playing defensively with a low block structure, presenting opportunities for long shots.',
+              'Based on recent games, ${widget.homeTeam} shows high momentum in attack phase (average speed of transition is up by 14%). ${widget.awayTeam} is playing defensively with a low block structure, presenting opportunities for long shots.',
               style: GoogleFonts.inter(
                 color: Colors.white,
                 fontSize: 13,
@@ -698,7 +892,7 @@ class MatchDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${player.role} • #${player.number}',
+                          '${player.role} • #${player.number.length > 3 ? "IPL" : player.number}',
                           style: GoogleFonts.inter(
                             color: const Color(0xFF00FF7F),
                             fontWeight: FontWeight.w600,
@@ -749,7 +943,7 @@ class MatchDetailScreen extends StatelessWidget {
                   border: Border.all(color: Colors.grey[800]!),
                 ),
                 child: Text(
-                  player.stats,
+                  player.stats.isEmpty ? 'Matches: 14, Strike Rate: 135.2, Impact Rating: 8.2' : player.stats,
                   style: GoogleFonts.inter(
                     color: Colors.white,
                     fontSize: 14,
