@@ -80,33 +80,39 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
     _fetchFootballMatches();
   }
 
+  /// Converts a Unix millisecond timestamp to IST (UTC+5:30).
+  /// Returns formatted string like "20 May, 19:30 IST"
+  String _toIST(dynamic msTimestamp) {
+    if (msTimestamp == null) return '';
+    try {
+      final ms = msTimestamp is String ? int.parse(msTimestamp) : (msTimestamp as int);
+      final utc = DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true);
+      final ist = utc.add(const Duration(hours: 5, minutes: 30));
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      final day   = ist.day.toString().padLeft(2, '0');
+      final month = months[ist.month - 1];
+      final hour  = ist.hour.toString().padLeft(2, '0');
+      final min   = ist.minute.toString().padLeft(2, '0');
+      return '$day $month, $hour:$min IST';
+    } catch (_) {
+      return '';
+    }
+  }
+
   Future<void> _fetchLiveCricketMatches() async {
     try {
-      final response = await http.get(Uri.parse('http://127.0.0.1:8000/api/cricket/matches/live'));
+      final response = await http.get(
+        Uri.parse('http://127.0.0.1:8000/api/cricket/matches/live-and-upcoming'),
+      );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        
         setState(() {
-          // Handle our mock format {"data": [...]}
-          if (data['data'] != null) {
-             _cricketMatches = data['data'] is List ? data['data'] : [data];
-          } 
-          // Handle Cricbuzz RapidAPI raw format {"typeMatches": [...]}
-          else if (data['typeMatches'] != null) {
-             List<dynamic> allMatches = [];
-             for (var typeMatch in data['typeMatches']) {
-               if (typeMatch['seriesMatches'] != null) {
-                 for (var series in typeMatch['seriesMatches']) {
-                   if (series['seriesAdWrapper'] != null && series['seriesAdWrapper']['matches'] != null) {
-                     allMatches.addAll(series['seriesAdWrapper']['matches']);
-                   }
-                 }
-               }
-             }
-             _cricketMatches = allMatches;
+          // New endpoint returns {"status": "success", "matches": [...]}
+          if (data['matches'] != null) {
+            _cricketMatches = data['matches'] is List ? data['matches'] : [];
           } else {
-             // Fallback if we just got a list or some unknown dict
-             _cricketMatches = data is List ? data : [data];
+            _cricketMatches = [];
           }
           _isLoading = false;
         });
@@ -114,7 +120,7 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
         setState(() => _isLoading = false);
       }
     } catch (e) {
-      print('Error fetching matches: $e');
+      debugPrint('Error fetching cricket matches: $e');
       setState(() => _isLoading = false);
     }
   }
@@ -184,10 +190,25 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator(color: Color(0xFF00FF7F)));
     }
-    
+
     if (_cricketMatches.isEmpty) {
       return Center(
-        child: Text('No Live Matches Found (or API error)', style: GoogleFonts.inter(color: Colors.white)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.sports_cricket, color: Colors.grey[700], size: 64),
+            const SizedBox(height: 16),
+            Text(
+              'No Live or Upcoming Matches',
+              style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Check back soon for upcoming fixtures.',
+              style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 13),
+            ),
+          ],
+        ),
       );
     }
 
@@ -196,26 +217,49 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
       itemCount: _cricketMatches.length,
       itemBuilder: (context, index) {
         final match = _cricketMatches[index];
-        // Handling both our mock format and a potential raw rapidapi format roughly
-        final team1 = match['matchInfo']?['team1']?['teamName'] ?? match['team1']?['name'] ?? 'Team A';
-        final team2 = match['matchInfo']?['team2']?['teamName'] ?? match['team2']?['name'] ?? 'Team B';
-        final status = match['matchInfo']?['status'] ?? match['status'] ?? 'Live';
-        
-        // Extract scores if available (Cricbuzz format)
-        String t1Score = '-';
-        if (match['matchScore']?['team1Score']?['inngs1'] != null) {
-          final runs = match['matchScore']['team1Score']['inngs1']['runs'];
-          final wickets = match['matchScore']['team1Score']['inngs1']['wickets'] ?? 0;
-          t1Score = '$runs/$wickets';
+        final info = match['matchInfo'] ?? {};
+        final team1 = info['team1']?['teamName'] ?? 'Team A';
+        final team1Short = info['team1']?['teamSName'] ?? team1[0];
+        final team2 = info['team2']?['teamName'] ?? 'Team B';
+        final team2Short = info['team2']?['teamSName'] ?? team2[0];
+        final matchStatus = info['status'] ?? 'Upcoming';
+        final state = info['state'] ?? 'Preview';
+        final venue = info['venueInfo']?['ground'] ?? 'Cricket Ground';
+        final city = info['venueInfo']?['city'] ?? '';
+        final format = info['matchFormat'] ?? '';
+        final seriesName = match['_seriesName'] ?? info['seriesName'] ?? '';
+
+        final isLive = state.toLowerCase() != 'preview' && state.toLowerCase() != 'complete';
+        final isUpcoming = state.toLowerCase() == 'preview';
+
+        // Format start time in IST for upcoming matches
+        final startMs = info['startDate'];
+        final istTime = startMs != null ? _toIST(startMs) : '';
+        final displayStatus = isUpcoming && istTime.isNotEmpty
+            ? 'Starts $istTime'
+            : (isLive ? '● LIVE — $state' : matchStatus);
+
+        // Extract scores (Cricbuzz format)
+        String t1Score = '';
+        final t1Inngs1 = match['matchScore']?['team1Score']?['inngs1'];
+        if (t1Inngs1 != null) {
+          final runs = t1Inngs1['runs'];
+          final wkts = t1Inngs1['wickets'] ?? 0;
+          final overs = t1Inngs1['overs'];
+          t1Score = '$runs/$wkts${overs != null ? ' ($overs)' : ''}';
         }
-        
-        String t2Score = '-';
-        if (match['matchScore']?['team2Score']?['inngs1'] != null) {
-          final runs = match['matchScore']['team2Score']['inngs1']['runs'];
-          final wickets = match['matchScore']['team2Score']['inngs1']['wickets'] ?? 0;
-          t2Score = '$runs/$wickets';
+
+        String t2Score = '';
+        final t2Inngs1 = match['matchScore']?['team2Score']?['inngs1'];
+        if (t2Inngs1 != null) {
+          final runs = t2Inngs1['runs'];
+          final wkts = t2Inngs1['wickets'] ?? 0;
+          final overs = t2Inngs1['overs'];
+          t2Score = '$runs/$wkts${overs != null ? ' ($overs)' : ''}';
         }
-        
+
+        final scoreText = (t1Score.isEmpty && t2Score.isEmpty) ? 'VS' : '$t1Score / $t2Score';
+
         return GestureDetector(
           onTap: () {
             Navigator.push(
@@ -224,10 +268,10 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
                 builder: (context) => MatchDetailScreen(
                   homeTeam: team1,
                   awayTeam: team2,
-                  statusText: status,
-                  scoreText: (t1Score == '-' && t2Score == '-') ? 'VS' : '$t1Score - $t2Score',
-                  isLive: status.toUpperCase().contains('LIVE') || !status.toUpperCase().contains('WON'),
-                  venue: match['matchInfo']?['venueInfo']?['ground'] ?? 'Cricket Ground',
+                  statusText: isLive ? '● LIVE - $state' : displayStatus,
+                  scoreText: scoreText,
+                  isLive: isLive,
+                  venue: '$venue${city.isNotEmpty ? ', $city' : ''}',
                 ),
               ),
             );
@@ -238,40 +282,206 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
             decoration: BoxDecoration(
               color: const Color(0xFF1E1E1E),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[800]!),
+              border: Border.all(
+                color: isLive ? Colors.redAccent.withValues(alpha: 0.4) : Colors.grey[800]!,
+                width: isLive ? 1.5 : 1.0,
+              ),
+              boxShadow: isLive
+                  ? [BoxShadow(color: Colors.redAccent.withValues(alpha: 0.08), blurRadius: 12, spreadRadius: 1)]
+                  : [],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.redAccent.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(4),
+                // Header row: badge + series name + format
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isLive
+                            ? Colors.redAccent.withValues(alpha: 0.2)
+                            : Colors.blueAccent.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isLive) ...[
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: Colors.redAccent,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                          ],
+                          Text(
+                            isLive ? 'LIVE' : 'UPCOMING',
+                            style: GoogleFonts.inter(
+                              color: isLive ? Colors.redAccent : Colors.blueAccent,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (format.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[800],
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          format,
+                          style: GoogleFonts.inter(color: Colors.grey[400], fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                  ],
+                ),
+                if (seriesName.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    seriesName,
+                    style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 10),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  child: Text(status, style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                ],
+                const SizedBox(height: 14),
+                // Team 1 row
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 14,
+                      backgroundColor: Colors.grey[800],
+                      child: Text(
+                        team1Short.isNotEmpty ? team1Short[0] : '?',
+                        style: GoogleFonts.inter(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            team1,
+                            style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            team1Short,
+                            style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      t1Score.isNotEmpty ? t1Score : (isUpcoming ? '-' : '-'),
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // VS divider
+                Row(
+                  children: [
+                    const SizedBox(width: 38),
+                    Expanded(child: Divider(color: Colors.grey[800], height: 1)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Text(
+                        'VS',
+                        style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: Colors.grey[800], height: 1)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // Team 2 row
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 14,
+                      backgroundColor: Colors.grey[800],
+                      child: Text(
+                        team2Short.isNotEmpty ? team2Short[0] : '?',
+                        style: GoogleFonts.inter(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            team2,
+                            style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white70, fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            team2Short,
+                            style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      t2Score.isNotEmpty ? t2Score : (isUpcoming ? '-' : '-'),
+                      style: GoogleFonts.inter(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    // Using a CircleAvatar as a placeholder until you add the flag assets!
-                    CircleAvatar(radius: 12, backgroundColor: Colors.grey[800], child: Text(team1.isNotEmpty ? team1[0] : '?', style: const TextStyle(fontSize: 10, color: Colors.white))),
-                    const SizedBox(width: 8),
-                    Text(team1, style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
-                    const Spacer(),
-                    Text(t1Score, style: GoogleFonts.inter(color: Colors.white)),
-                  ],
+                // Status / venue footer
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[900],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    displayStatus,
+                    style: GoogleFonts.inter(
+                      color: isLive ? const Color(0xFF00FF7F) : (isUpcoming ? Colors.blueAccent[100] : Colors.grey[400]),
+                      fontSize: 11,
+                      fontWeight: isLive || isUpcoming ? FontWeight.bold : FontWeight.normal,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    CircleAvatar(radius: 12, backgroundColor: Colors.grey[800], child: Text(team2.isNotEmpty ? team2[0] : '?', style: const TextStyle(fontSize: 10, color: Colors.white))),
-                    const SizedBox(width: 8),
-                    Text(team2, style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white60)),
-                    const Spacer(),
-                    Text(t2Score, style: GoogleFonts.inter(color: Colors.white60)),
-                  ],
-                ),
+                if (venue.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on, size: 12, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          '$venue${city.isNotEmpty ? ', $city' : ''}',
+                          style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 11),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
