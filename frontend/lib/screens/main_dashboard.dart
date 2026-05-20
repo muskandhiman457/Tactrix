@@ -105,10 +105,10 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
       final response = await http.get(
         Uri.parse('http://127.0.0.1:8000/api/cricket/matches/live-and-upcoming'),
       );
+      if (!mounted) return;
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          // New endpoint returns {"status": "success", "matches": [...]}
           if (data['matches'] != null) {
             _cricketMatches = data['matches'] is List ? data['matches'] : [];
           } else {
@@ -121,13 +121,16 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
       }
     } catch (e) {
       debugPrint('Error fetching cricket matches: $e');
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _fetchFootballMatches() async {
     try {
-      final response = await http.get(Uri.parse('http://127.0.0.1:8000/api/football/matches/by-league?leagueid=42'));
+      final response = await http.get(
+        Uri.parse('http://127.0.0.1:8000/api/football/matches/by-league?leagueid=42'),
+      );
+      if (!mounted) return;
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
@@ -142,8 +145,8 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
         setState(() => _isFootballLoading = false);
       }
     } catch (e) {
-      print('Error fetching football matches: $e');
-      setState(() => _isFootballLoading = false);
+      debugPrint('Error fetching football matches: $e');
+      if (mounted) setState(() => _isFootballLoading = false);
     }
   }
 
@@ -262,6 +265,7 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
 
         return GestureDetector(
           onTap: () {
+            final matchId = info['matchId'];
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -272,6 +276,8 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
                   scoreText: scoreText,
                   isLive: isLive,
                   venue: '$venue${city.isNotEmpty ? ', $city' : ''}',
+                  isCricket: true,
+                  matchId: matchId?.toString(),
                 ),
               ),
             );
