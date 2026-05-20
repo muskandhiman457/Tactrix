@@ -33,14 +33,14 @@ class MatchDetailScreen extends StatefulWidget {
 
   const MatchDetailScreen({
     super.key,
-    required this.homeTeam,
-    required this.awayTeam,
+    this.homeTeam = 'MUMBAI',
+    this.awayTeam = 'CHENNAI',
     this.homeLogoUrl,
     this.awayLogoUrl,
-    required this.statusText,
-    required this.scoreText,
-    required this.isLive,
-    required this.venue,
+    this.statusText = '● LIVE - 2nd Half',
+    this.scoreText = '2 - 1',
+    this.isLive = true,
+    this.venue = 'Wankhede Stadium',
     this.isCricket = false,
     this.matchId,
   });
