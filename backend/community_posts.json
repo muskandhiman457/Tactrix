@@ -1,0 +1,190 @@
+[
+  {
+    "id": "10",
+    "name": "Alex Champion",
+    "handle": "@alex_champ",
+    "time": "Just now",
+    "content": "This is a new test post for verification!",
+    "likes": 1,
+    "liked_by": [
+      "@alex_champ"
+    ],
+    "comments": [
+      {
+        "id": "c1_1779988537.507151",
+        "name": "Alex Champion",
+        "handle": "@alex_champ",
+        "content": "Adding a quick verification comment.",
+        "time": "Just now"
+      }
+    ]
+  },
+  {
+    "id": "9",
+    "name": "Alex Champion",
+    "handle": "@alex_champ",
+    "time": "Just now",
+    "content": "This is a new test post for verification!",
+    "likes": 1,
+    "liked_by": [
+      "@alex_champ"
+    ],
+    "comments": [
+      {
+        "id": "c1_1779987794.465524",
+        "name": "Alex Champion",
+        "handle": "@alex_champ",
+        "content": "Adding a quick verification comment.",
+        "time": "Just now"
+      }
+    ]
+  },
+  {
+    "id": "8",
+    "name": "Alex Champion",
+    "handle": "@alex_champ",
+    "time": "Just now",
+    "content": "This is a new test post for verification!",
+    "likes": 1,
+    "liked_by": [
+      "@alex_champ"
+    ],
+    "comments": [
+      {
+        "id": "c1_1779916788.94244",
+        "name": "Alex Champion",
+        "handle": "@alex_champ",
+        "content": "Adding a quick verification comment.",
+        "time": "Just now"
+      }
+    ]
+  },
+  {
+    "id": "7",
+    "name": "Muskan",
+    "handle": "@mikasa",
+    "time": "Just now",
+    "content": "how the match today",
+    "likes": 1,
+    "liked_by": [
+      "@mikasa"
+    ],
+    "comments": [
+      {
+        "id": "c1_1779913584.596284",
+        "name": "Muskan",
+        "handle": "@mikasa",
+        "content": "what do you mean",
+        "time": "Just now"
+      }
+    ]
+  },
+  {
+    "id": "6",
+    "name": "Sports Fan",
+    "handle": "@sports_fan",
+    "time": "Just now",
+    "content": "wowww what a game",
+    "likes": 0,
+    "liked_by": [],
+    "comments": []
+  },
+  {
+    "id": "5",
+    "name": "Alex Champion",
+    "handle": "@alex_champ",
+    "time": "Just now",
+    "content": "This is a new test post for verification!",
+    "likes": 1,
+    "liked_by": [
+      "@alex_champ"
+    ],
+    "comments": [
+      {
+        "id": "c1_1779909377.79311",
+        "name": "Alex Champion",
+        "handle": "@alex_champ",
+        "content": "Adding a quick verification comment.",
+        "time": "Just now"
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "name": "Alex Champion",
+    "handle": "@alex_champ",
+    "time": "Just now",
+    "content": "This is a new test post for verification!",
+    "likes": 1,
+    "liked_by": [
+      "@alex_champ"
+    ],
+    "comments": [
+      {
+        "id": "c1_1779904818.168869",
+        "name": "Alex Champion",
+        "handle": "@alex_champ",
+        "content": "Adding a quick verification comment.",
+        "time": "Just now"
+      }
+    ]
+  },
+  {
+    "id": "1",
+    "name": "Sarah Jenkins",
+    "handle": "@sjenkins_sports",
+    "time": "2h ago",
+    "content": "What an incredible IPL match! The comeback by CSK in the death overs was absolutely legendary. Dhoni's finishing style is timeless! \u26bd\ud83d\udd25 #IPL2026 #CSK",
+    "likes": 124,
+    "liked_by": [
+      "@user1",
+      "@user2"
+    ],
+    "comments": [
+      {
+        "id": "c1",
+        "name": "Rohan Sharma",
+        "handle": "@rohan_cricket",
+        "content": "Absolutely true! The Dhoni aura is unmatched.",
+        "time": "1h ago"
+      },
+      {
+        "id": "c2",
+        "name": "Amit Patel",
+        "handle": "@amit_p",
+        "content": "MI bowled poorly in the last 2 overs.",
+        "time": "45m ago"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "name": "David Miller",
+    "handle": "@killer_miller",
+    "time": "4h ago",
+    "content": "Can we talk about Haaland's positioning? The guy is literally a magnet for the ball in the box. 35 goals in a single season is just ridiculous! \u26bd\ud83d\udc51 #ManCity #Haaland",
+    "likes": 98,
+    "liked_by": [
+      "@user3"
+    ],
+    "comments": [
+      {
+        "id": "c3",
+        "name": "John Doe",
+        "handle": "@johndoe_football",
+        "content": "Best striker in the world right now, no debate.",
+        "time": "3h ago"
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "name": "Pawan Kumar",
+    "handle": "@pawan_kabaddi",
+    "time": "6h ago",
+    "content": "That last raid in the Kabaddi finals was mindblowing. Speed, agility, and pure power. That is how champions play! \u26a1\ud83e\udd81 #Kabaddi #ProKabaddi",
+    "likes": 76,
+    "liked_by": [],
+    "comments": []
+  }
+]

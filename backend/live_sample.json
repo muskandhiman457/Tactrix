@@ -1,0 +1,280 @@
+{
+  "typeMatches": [
+    {
+      "matchType": "International",
+      "seriesMatches": [
+        {
+          "seriesAdWrapper": {
+            "seriesId": 12134,
+            "seriesName": "ICC Men's T20 World Cup Europe Sub Regional Qualifier A 2026",
+            "matches": [
+              {
+                "matchInfo": {
+                  "matchId": 154958,
+                  "seriesId": 12134,
+                  "seriesName": "ICC Men's T20 World Cup Europe Sub Regional Qualifier A 2026",
+                  "matchDesc": "15th Match",
+                  "matchFormat": "T20",
+                  "startDate": "1779280200000",
+                  "endDate": "1779292800000",
+                  "state": "Complete",
+                  "status": "Malta won by 6 wkts",
+                  "team1": {
+                    "teamId": 534,
+                    "teamName": "Sweden",
+                    "teamSName": "SWE",
+                    "imageId": 248454
+                  },
+                  "team2": {
+                    "teamId": 522,
+                    "teamName": "Malta",
+                    "teamSName": "Malta",
+                    "imageId": 172572
+                  },
+                  "venueInfo": {
+                    "id": 1893,
+                    "ground": "Happy Valley Ground",
+                    "city": "Episkopi",
+                    "timezone": "+03:00",
+                    "latitude": "34.6741916",
+                    "longitude": "32.8010629"
+                  },
+                  "currBatTeamId": 522,
+                  "seriesStartDt": "1778889600000",
+                  "seriesEndDt": "1779667200000",
+                  "isTimeAnnounced": true,
+                  "stateTitle": "Complete"
+                },
+                "matchScore": {
+                  "team1Score": {
+                    "inngs1": {
+                      "inningsId": 1,
+                      "runs": 181,
+                      "wickets": 8,
+                      "overs": 19.6
+                    }
+                  },
+                  "team2Score": {
+                    "inngs1": {
+                      "inningsId": 2,
+                      "runs": 182,
+                      "wickets": 4,
+                      "overs": 18.6
+                    }
+                  }
+                }
+              },
+              {
+                "matchInfo": {
+                  "matchId": 154969,
+                  "seriesId": 12134,
+                  "seriesName": "ICC Men's T20 World Cup Europe Sub Regional Qualifier A 2026",
+                  "matchDesc": "16th Match",
+                  "matchFormat": "T20",
+                  "startDate": "1779280200000",
+                  "endDate": "1779292800000",
+                  "state": "Complete",
+                  "status": "Jersey won by 109 runs",
+                  "team1": {
+                    "teamId": 303,
+                    "teamName": "Jersey",
+                    "teamSName": "JER",
+                    "imageId": 776300
+                  },
+                  "team2": {
+                    "teamId": 1076,
+                    "teamName": "Croatia",
+                    "teamSName": "CRT",
+                    "imageId": 247197
+                  },
+                  "venueInfo": {
+                    "id": 1437708,
+                    "ground": "Happy Valley Ground 2",
+                    "city": "Episkopi",
+                    "timezone": "+03:00",
+                    "latitude": "34.6741916",
+                    "longitude": "32.8010629"
+                  },
+                  "currBatTeamId": 303,
+                  "seriesStartDt": "1778889600000",
+                  "seriesEndDt": "1779667200000",
+                  "isTimeAnnounced": true,
+                  "stateTitle": "Complete"
+                },
+                "matchScore": {
+                  "team1Score": {
+                    "inngs1": {
+                      "inningsId": 1,
+                      "runs": 280,
+                      "wickets": 3,
+                      "overs": 19.6
+                    }
+                  },
+                  "team2Score": {
+                    "inngs1": {
+                      "inningsId": 2,
+                      "runs": 171,
+                      "wickets": 10,
+                      "overs": 19.3
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "matchType": "League",
+      "seriesMatches": [
+        {
+          "seriesAdWrapper": {
+            "seriesId": 9241,
+            "seriesName": "Indian Premier League 2026",
+            "matches": [
+              {
+                "matchInfo": {
+                  "matchId": 152218,
+                  "seriesId": 9241,
+                  "seriesName": "Indian Premier League 2026",
+                  "matchDesc": "65th Match",
+                  "matchFormat": "T20",
+                  "startDate": "1779285600000",
+                  "endDate": "1779298200000",
+                  "state": "In Progress",
+                  "status": "Kolkata Knight Riders need 14 runs in 22 balls",
+                  "team1": {
+                    "teamId": 62,
+                    "teamName": "Mumbai Indians",
+                    "teamSName": "MI",
+                    "imageId": 860053
+                  },
+                  "team2": {
+                    "teamId": 63,
+                    "teamName": "Kolkata Knight Riders",
+                    "teamSName": "KKR",
+                    "imageId": 860046
+                  },
+                  "venueInfo": {
+                    "id": 31,
+                    "ground": "Eden Gardens",
+                    "city": "Kolkata",
+                    "timezone": "+05:30",
+                    "latitude": "22.564527",
+                    "longitude": "88.343247"
+                  },
+                  "currBatTeamId": 63,
+                  "seriesStartDt": "1774656000000",
+                  "seriesEndDt": "1780358400000",
+                  "isTimeAnnounced": true,
+                  "stateTitle": "In Progress",
+                  "isFantasyEnabled": true
+                },
+                "matchScore": {
+                  "team1Score": {
+                    "inngs1": {
+                      "inningsId": 1,
+                      "runs": 147,
+                      "wickets": 8,
+                      "overs": 19.6
+                    }
+                  },
+                  "team2Score": {
+                    "inngs1": {
+                      "inningsId": 2,
+                      "runs": 134,
+                      "wickets": 5,
+                      "overs": 16.2
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "matchType": "Women",
+      "seriesMatches": [
+        {
+          "seriesAdWrapper": {
+            "seriesId": 10526,
+            "seriesName": "New Zealand Women tour of England 2026",
+            "matches": [
+              {
+                "matchInfo": {
+                  "matchId": 129403,
+                  "seriesId": 10526,
+                  "seriesName": "New Zealand Women tour of England 2026",
+                  "matchDesc": "1st T20I",
+                  "matchFormat": "T20",
+                  "startDate": "1779298200000",
+                  "endDate": "1779310800000",
+                  "state": "In Progress",
+                  "status": "England Women opt to bowl",
+                  "team1": {
+                    "teamId": 98,
+                    "teamName": "New Zealand Women",
+                    "teamSName": "NZW",
+                    "imageId": 776338
+                  },
+                  "team2": {
+                    "teamId": 99,
+                    "teamName": "England Women",
+                    "teamSName": "ENGW",
+                    "imageId": 776241
+                  },
+                  "venueInfo": {
+                    "id": 226,
+                    "ground": "County Ground",
+                    "city": "Derby",
+                    "timezone": "+01:00",
+                    "latitude": "52.927517",
+                    "longitude": "-1.461188"
+                  },
+                  "currBatTeamId": 98,
+                  "seriesStartDt": "1778371200000",
+                  "seriesEndDt": "1779840000000",
+                  "isTimeAnnounced": true,
+                  "stateTitle": "In Progress"
+                },
+                "matchScore": {
+                  "team1Score": {
+                    "inngs1": {
+                      "inningsId": 1,
+                      "runs": 95,
+                      "wickets": 5,
+                      "overs": 13.5
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "ad": {
+            "name": "native_matches",
+            "layout": "native_large",
+            "position": 3
+          }
+        }
+      ]
+    }
+  ],
+  "filters": {
+    "matchType": [
+      "International",
+      "League",
+      "Domestic",
+      "Women"
+    ]
+  },
+  "appIndex": {
+    "seoTitle": "Live Cricket Score - Scorecard and Match Results",
+    "webURL": "www.cricbuzz.com/live-cricket-scores/"
+  },
+  "responseLastUpdated": "1779302085"
+}

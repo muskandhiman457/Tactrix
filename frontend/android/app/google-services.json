@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "46829962310",
+    "project_id": "sports-hub-92ef5",
+    "storage_bucket": "sports-hub-92ef5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:46829962310:android:b5c8473db7233bdabaf647",
+        "android_client_info": {
+          "package_name": "com.example.frontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANMvjkbeZtPI9RAMUHCBbGsuaZKEFFUdY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

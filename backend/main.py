@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import cricket, analysis, football, sports
+from routers import cricket, analysis, football, sports, community, kabaddi
 
 app = FastAPI(
     title="Multi-Sport Analytics API",
@@ -21,6 +21,8 @@ app.include_router(cricket.router)
 app.include_router(analysis.router)
 app.include_router(football.router)
 app.include_router(sports.router)
+app.include_router(community.router)
+app.include_router(kabaddi.router)
 
 @app.get("/")
 def read_root():

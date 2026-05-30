@@ -18,8 +18,11 @@ def search_football_players(search: str = "m"):
         "x-rapidapi-key": RAPIDAPI_KEY
     }
     
-    response = requests.get(url, headers=headers, params=querystring)
-    return response.json()
+    try:
+        response = requests.get(url, headers=headers, params=querystring, timeout=5)
+        return response.json()
+    except Exception as e:
+        return {"status": "error", "message": f"Request failed: {e}", "results": []}
 
 @router.get("/matches/live")
 def get_live_football_matches():
@@ -29,8 +32,11 @@ def get_live_football_matches():
         "x-rapidapi-key": RAPIDAPI_KEY
     }
     
-    response = requests.get(url, headers=headers)
-    return response.json()
+    try:
+        response = requests.get(url, headers=headers, timeout=5)
+        return response.json()
+    except Exception as e:
+        return {"status": "error", "message": f"Request failed: {e}", "matches": []}
 
 @router.get("/leagues/popular")
 def get_popular_leagues():
@@ -40,8 +46,11 @@ def get_popular_leagues():
         "x-rapidapi-key": RAPIDAPI_KEY
     }
     
-    response = requests.get(url, headers=headers)
-    return response.json()
+    try:
+        response = requests.get(url, headers=headers, timeout=5)
+        return response.json()
+    except Exception as e:
+        return {"status": "error", "message": f"Request failed: {e}", "leagues": []}
 
 @router.get("/matches/by-date")
 def get_matches_by_date(date: str):
@@ -56,8 +65,11 @@ def get_matches_by_date(date: str):
         "x-rapidapi-key": RAPIDAPI_KEY
     }
     
-    response = requests.get(url, headers=headers, params=querystring)
-    return response.json()
+    try:
+        response = requests.get(url, headers=headers, params=querystring, timeout=5)
+        return response.json()
+    except Exception as e:
+        return {"status": "error", "message": f"Request failed: {e}", "matches": []}
 
 @router.get("/matches/by-league")
 def get_matches_by_league(leagueid: str):
@@ -72,5 +84,8 @@ def get_matches_by_league(leagueid: str):
         "x-rapidapi-key": RAPIDAPI_KEY
     }
     
-    response = requests.get(url, headers=headers, params=querystring)
-    return response.json()
+    try:
+        response = requests.get(url, headers=headers, params=querystring, timeout=5)
+        return response.json()
+    except Exception as e:
+        return {"status": "error", "message": f"Request failed: {e}", "matches": []}
