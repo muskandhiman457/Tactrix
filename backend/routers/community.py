@@ -230,20 +230,51 @@ DEFAULT_NEWS = [
 ]
 
 def load_posts() -> List[dict]:
+    if db is not None:
+        try:
+            docs = db.collection("posts").order_by("order").stream()
+            posts = []
+            for doc in docs:
+                post_data = doc.to_dict()
+                if "order" in post_data:
+                    del post_data["order"]
+                posts.append(post_data)
+            if posts:
+                return posts
+            else:
+                print("Firestore posts collection is empty. Seeding defaults...")
+                save_posts(DEFAULT_POSTS)
+                return DEFAULT_POSTS
+        except Exception as e:
+            print(f"Error loading posts from Firestore: {e}")
+
+    # Fallback to local file
     if os.path.exists(POSTS_FILE):
         try:
             with open(POSTS_FILE, "r") as f:
                 return json.load(f)
         except Exception as e:
-            print(f"Error loading posts: {e}")
+            print(f"Error loading posts locally: {e}")
     return DEFAULT_POSTS
 
 def save_posts(posts: List[dict]):
+    # Keep local backup
     try:
         with open(POSTS_FILE, "w") as f:
             json.dump(posts, f, indent=2)
     except Exception as e:
-        print(f"Error saving posts: {e}")
+        print(f"Error saving posts locally: {e}")
+
+    # Sync to Firestore
+    if db is not None:
+        try:
+            # We write each post as a document to preserve scalability
+            for index, post in enumerate(posts):
+                post_copy = post.copy()
+                post_copy["order"] = index
+                db.collection("posts").document(post["id"]).set(post_copy)
+        except Exception as e:
+            print(f"Error syncing posts to Firestore: {e}")
 
 @router.get("/posts", response_model=List[PostSchema])
 def get_posts():
@@ -595,10 +626,14 @@ try:
     import firebase_admin
     from firebase_admin import credentials, firestore
     if not firebase_admin._apps:
-        try:
+        cred_path = "firebase_credentials.json"
+        if os.path.exists(cred_path):
+            print(f"Initializing Firebase with certificate: {cred_path}")
+            cred = credentials.Certificate(cred_path)
+            firebase_admin.initialize_app(cred)
+        else:
+            print("Initializing Firebase with default credentials")
             firebase_admin.initialize_app()
-        except Exception:
-            pass
     db = firestore.client()
 except Exception as e:
     print(f"Firestore Admin SDK not fully initialized: {e}")

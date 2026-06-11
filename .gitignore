@@ -15,3 +15,9 @@ build/
 .packages
 .pub-cache/
 .pub/
+
+# Secrets
+*credentials*.json
+*adminsdk*.json
+*firebase*.json
+
