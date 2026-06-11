@@ -270,6 +270,20 @@ def is_ipl(match: dict) -> bool:
     return is_ipl_t(t1) or is_ipl_t(t2)
 
 
+def is_allowed_match(match: dict) -> bool:
+    """Check if the match is an IPL match or an international match."""
+    # 1. Keep IPL matches
+    if is_ipl(match):
+        return True
+    
+    # 2. Keep international matches (which includes international ODI, Test, and T20Is)
+    match_type = (match.get("_matchType") or "").lower()
+    if "international" in match_type:
+        return True
+        
+    return False
+
+
 def get_mock_scorecard(match_id: int) -> dict:
     mapping = {
         99001: ("Chennai Super Kings", "CSK", "Mumbai Indians", "MI"),
@@ -545,7 +559,7 @@ def get_mock_scorecard(match_id: int) -> dict:
         "Ruturaj Gaikwad", "Hardik Pandya", "Faf du Plessis", 
         "Shreyas Iyer", "Pat Cummins", "Sanju Samson", 
         "Shubman Gill", "KL Rahul", "Rishabh Pant", "Shikhar Dhawan",
-        "MS Dhoni"
+        "MS Dhoni", "Babar Azam"
     }
     
     for roster in (t1_roster, t2_roster):
@@ -579,7 +593,7 @@ def get_live_and_upcoming_cricket_matches():
     """
     Returns all LIVE + UPCOMING cricket matches merged in one list.
     Filters out completed matches (state == 'Complete').
-    ONLY returns IPL matches.
+    Returns IPL matches and international/ODI/TEST matches.
     """
     all_matches = []
 
@@ -614,14 +628,14 @@ def get_live_and_upcoming_cricket_matches():
     except Exception as e:
         print(f"Error fetching upcoming matches: {e}")
 
-    # ONLY keep IPL matches
-    ipl_matches = [m for m in all_matches if is_ipl(m)]
+    # Keep IPL and international/ODI/TEST matches
+    filtered_matches = [m for m in all_matches if is_allowed_match(m)]
     
     # Fallback to mock IPL matches if none found
-    if not ipl_matches:
-        ipl_matches = MOCK_IPL_MATCHES
+    if not filtered_matches:
+        filtered_matches = MOCK_IPL_MATCHES
 
-    return {"status": "success", "matches": ipl_matches}
+    return {"status": "success", "matches": filtered_matches}
 
 
 @router.get("/matches/live")
@@ -638,15 +652,15 @@ def get_live_cricket_matches():
             m for m in _extract_matches(data)
             if m.get("matchInfo", {}).get("state", "").lower() != "complete"
         ]
-        ipl_matches = [m for m in matches if is_ipl(m)]
-        if not ipl_matches:
+        filtered_matches = [m for m in matches if is_allowed_match(m)]
+        if not filtered_matches:
             # return only the mock live match
-            ipl_matches = [m for m in MOCK_IPL_MATCHES if m["matchInfo"]["state"].lower() == "live"]
-        return {"status": "success", "matches": ipl_matches}
+            filtered_matches = [m for m in MOCK_IPL_MATCHES if m["matchInfo"]["state"].lower() == "live"]
+        return {"status": "success", "matches": filtered_matches}
     except Exception as e:
         # Fallback to mock live if exception
-        ipl_matches = [m for m in MOCK_IPL_MATCHES if m["matchInfo"]["state"].lower() == "live"]
-        return {"status": "success", "matches": ipl_matches}
+        filtered_matches = [m for m in MOCK_IPL_MATCHES if m["matchInfo"]["state"].lower() == "live"]
+        return {"status": "success", "matches": filtered_matches}
 
 
 @router.get("/matches/upcoming")
@@ -663,15 +677,15 @@ def get_upcoming_cricket_matches():
             m for m in _extract_matches(data)
             if m.get("matchInfo", {}).get("state", "").lower() == "preview"
         ]
-        ipl_matches = [m for m in matches if is_ipl(m)]
-        if not ipl_matches:
+        filtered_matches = [m for m in matches if is_allowed_match(m)]
+        if not filtered_matches:
             # return only the mock preview matches
-            ipl_matches = [m for m in MOCK_IPL_MATCHES if m["matchInfo"]["state"].lower() == "preview"]
-        return {"status": "success", "matches": ipl_matches}
+            filtered_matches = [m for m in MOCK_IPL_MATCHES if m["matchInfo"]["state"].lower() == "preview"]
+        return {"status": "success", "matches": filtered_matches}
     except Exception as e:
         # Fallback to mock preview if exception
-        ipl_matches = [m for m in MOCK_IPL_MATCHES if m["matchInfo"]["state"].lower() == "preview"]
-        return {"status": "success", "matches": ipl_matches}
+        filtered_matches = [m for m in MOCK_IPL_MATCHES if m["matchInfo"]["state"].lower() == "preview"]
+        return {"status": "success", "matches": filtered_matches}
 
 
 def get_ipl_logo_path(team_name: str) -> str:
@@ -826,7 +840,7 @@ def get_match_scorecard(match_id: int):
         print(f"Error fetching scorecard stats for match {match_id}: {e}")
 
     # Merge stats into teams_roster if we have both
-    has_players = any(len(t_data.get("players", [])) > 0 for t_data in teams_roster.values())
+    has_players = len(teams_roster) == 2 and all(len(t_data.get("players", [])) > 0 for t_data in teams_roster.values())
     if teams_roster and has_players:
         for team_name, t_data in teams_roster.items():
             for p in t_data["playingXI"]:
@@ -895,7 +909,7 @@ def get_match_scorecard(match_id: int):
                     "playingXI": t_val.get("players", []),
                     "bench": []
                 }
-            has_compat_players = any(len(t_val.get("players", [])) > 0 for t_val in compatible_teams.values())
+            has_compat_players = len(compatible_teams) == 2 and all(len(t_val.get("players", [])) > 0 for t_val in compatible_teams.values())
             if compatible_teams and has_compat_players:
                 return {"status": "success", "teams": compatible_teams}
         except Exception as e:

@@ -147,6 +147,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Center(
+                  child: Image.asset(
+                    'assets/logos/tactrix_multi_sport_logo.png',
+                    height: 80,
+                  ),
+                ),
+                const SizedBox(height: 24),
                 Text(
                   'JOIN THE LEAGUE',
                   style: GoogleFonts.outfit(

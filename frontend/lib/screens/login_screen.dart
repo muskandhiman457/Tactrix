@@ -149,14 +149,13 @@ class _LoginScreenState extends State<LoginScreen>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.sports_score,
-                      size: 80,
-                      color: Color(0xFF00FF7F), // Neon Green
+                    Image.asset(
+                      'assets/logos/tactrix_multi_sport_logo.png',
+                      height: 80,
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'SPORTS HUB',
+                      'TACTRIX',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.outfit(
                         fontSize: 36,

@@ -1,0 +1,154 @@
+{
+  "typeMatches": [
+    {
+      "matchType": "International",
+      "seriesMatches": [
+        {
+          "seriesAdWrapper": {
+            "seriesId": 12453,
+            "seriesName": "Asian Games Men's T20I Qualifier, 2026",
+            "matches": [
+              {
+                "matchInfo": {
+                  "matchId": 159393,
+                  "seriesId": 12453,
+                  "seriesName": "Asian Games Men's T20I Qualifier, 2026",
+                  "matchDesc": "2nd Match, Group B",
+                  "matchFormat": "T20",
+                  "startDate": "1780277400000",
+                  "endDate": "1780290000000",
+                  "state": "Preview",
+                  "status": "Match starts at Jun 01, 01:30 GMT",
+                  "team1": {
+                    "teamId": 304,
+                    "teamName": "Oman",
+                    "teamSName": "OMAN",
+                    "imageId": 776328
+                  },
+                  "team2": {
+                    "teamId": 190,
+                    "teamName": "Singapore",
+                    "teamSName": "SIN",
+                    "imageId": 776275
+                  },
+                  "venueInfo": {
+                    "id": 1437915,
+                    "ground": "Singapore National Cricket Ground",
+                    "city": "Singapore",
+                    "timezone": "+08:00",
+                    "latitude": "1.3040184",
+                    "longitude": "103.8699663"
+                  },
+                  "seriesStartDt": "1780185600000",
+                  "seriesEndDt": "1781049600000",
+                  "isTimeAnnounced": true,
+                  "stateTitle": "Preview"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "matchType": "League",
+      "seriesMatches": [
+        {
+          "seriesAdWrapper": {
+            "seriesId": 12299,
+            "seriesName": "T20 Mumbai 2026",
+            "matches": [
+              {
+                "matchInfo": {
+                  "matchId": 156707,
+                  "seriesId": 12299,
+                  "seriesName": "T20 Mumbai 2026",
+                  "matchDesc": "1st Match",
+                  "matchFormat": "T20",
+                  "startDate": "1780302600000",
+                  "endDate": "1780315200000",
+                  "state": "Preview",
+                  "status": "Match starts at Jun 01, 08:30 GMT",
+                  "team1": {
+                    "teamId": 584,
+                    "teamName": "Bandra Blasters",
+                    "teamSName": "BB",
+                    "imageId": 172630
+                  },
+                  "team2": {
+                    "teamId": 580,
+                    "teamName": "Eagle Thane Strikers",
+                    "teamSName": "ETS",
+                    "imageId": 172626
+                  },
+                  "venueInfo": {
+                    "id": 81,
+                    "ground": "Wankhede Stadium",
+                    "city": "Mumbai",
+                    "timezone": "+05:30",
+                    "latitude": "18.938956",
+                    "longitude": "72.825719"
+                  },
+                  "seriesStartDt": "1780272000000",
+                  "seriesEndDt": "1781481600000",
+                  "isTimeAnnounced": true,
+                  "stateTitle": "Preview"
+                }
+              },
+              {
+                "matchInfo": {
+                  "matchId": 156718,
+                  "seriesId": 12299,
+                  "seriesName": "T20 Mumbai 2026",
+                  "matchDesc": "2nd Match",
+                  "matchFormat": "T20",
+                  "startDate": "1780320600000",
+                  "endDate": "1780333200000",
+                  "state": "Preview",
+                  "status": "Match starts at Jun 01, 13:30 GMT",
+                  "team1": {
+                    "teamId": 2396,
+                    "teamName": "MSC Maratha Royals",
+                    "teamSName": "MSCMR",
+                    "imageId": 713540
+                  },
+                  "team2": {
+                    "teamId": 578,
+                    "teamName": "Aakash Tigers MWS",
+                    "teamSName": "ATMWS",
+                    "imageId": 172624
+                  },
+                  "venueInfo": {
+                    "id": 81,
+                    "ground": "Wankhede Stadium",
+                    "city": "Mumbai",
+                    "timezone": "+05:30",
+                    "latitude": "18.938956",
+                    "longitude": "72.825719"
+                  },
+                  "seriesStartDt": "1780272000000",
+                  "seriesEndDt": "1781481600000",
+                  "isTimeAnnounced": true,
+                  "stateTitle": "Preview"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "filters": {
+    "matchType": [
+      "International",
+      "League",
+      "Domestic",
+      "Women"
+    ]
+  },
+  "appIndex": {
+    "seoTitle": "Live Cricket Score - Scorecard and Match Results",
+    "webURL": "www.cricbuzz.com/live-cricket-scores/"
+  },
+  "responseLastUpdated": "1780248408"
+}

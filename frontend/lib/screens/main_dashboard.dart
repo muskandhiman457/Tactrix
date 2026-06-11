@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../services/api_config.dart';
 import 'profile_screen.dart';
 import 'analysis_screen.dart';
@@ -92,11 +93,11 @@ class _MainDashboardState extends State<MainDashboard> {
           showUnselectedLabels: true,
           selectedLabelStyle: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12),
           unselectedLabelStyle: GoogleFonts.inter(fontSize: 12),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Analysis'),
-            BottomNavigationBarItem(icon: Icon(Icons.people_alt), label: 'Community'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          items: [
+            BottomNavigationBarItem(icon: const Icon(Icons.home_filled), label: 'home'.tr()),
+            BottomNavigationBarItem(icon: const Icon(Icons.analytics), label: 'analysis'.tr()),
+            BottomNavigationBarItem(icon: const Icon(Icons.people_alt), label: 'community'.tr()),
+            BottomNavigationBarItem(icon: const Icon(Icons.person), label: 'profile'.tr()),
           ],
         ),
       ),
@@ -234,21 +235,21 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
           backgroundColor: const Color(0xFF1E1E1E),
           elevation: 0,
           title: Text(
-            'SPORTS HUB',
+            'app_title'.tr(),
             style: GoogleFonts.outfit(
               fontWeight: FontWeight.bold,
               letterSpacing: 2,
               color: const Color(0xFF00FF7F),
             ),
           ),
-          bottom: const TabBar(
-            indicatorColor: Color(0xFF00FF7F),
+          bottom: TabBar(
+            indicatorColor: const Color(0xFF00FF7F),
             labelColor: Colors.white,
             unselectedLabelColor: Colors.grey,
             tabs: [
-              Tab(text: 'CRICKET', icon: Icon(Icons.sports_cricket)),
-              Tab(text: 'KABADDI', icon: Icon(Icons.sports_kabaddi)),
-              Tab(text: 'FOOTBALL', icon: Icon(Icons.sports_soccer)),
+              Tab(text: 'cricket'.tr().toUpperCase(), icon: const Icon(Icons.sports_cricket)),
+              Tab(text: 'kabaddi'.tr().toUpperCase(), icon: const Icon(Icons.sports_kabaddi)),
+              Tab(text: 'football'.tr().toUpperCase(), icon: const Icon(Icons.sports_soccer)),
             ],
           ),
         ),
@@ -276,12 +277,12 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
             Icon(Icons.sports_cricket, color: Colors.grey[700], size: 64),
             const SizedBox(height: 16),
             Text(
-              'No Live or Upcoming Matches',
+              'no_matches_found'.tr(),
               style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
             Text(
-              'Check back soon for upcoming fixtures.',
+              'check_back_soon'.tr(),
               style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 13),
             ),
           ],
@@ -323,8 +324,8 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
         final startMs = info['startDate'];
         final istTime = startMs != null ? _toIST(startMs) : '';
         final displayStatus = isUpcoming && istTime.isNotEmpty
-            ? 'Starts $istTime'
-            : (isLive ? '● LIVE — $state' : matchStatus);
+            ? 'starts_at'.tr(namedArgs: {'time': istTime})
+            : (isLive ? '● ${'live'.tr().toUpperCase()} — $state' : matchStatus);
 
         // Extract scores (Cricbuzz format)
         String t1Score = '';
@@ -412,7 +413,7 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
                             const SizedBox(width: 5),
                           ],
                           Text(
-                            isLive ? 'LIVE' : 'UPCOMING',
+                            isLive ? 'live'.tr().toUpperCase() : 'upcoming'.tr().toUpperCase(),
                             style: GoogleFonts.inter(
                               color: isLive ? Colors.redAccent : Colors.blueAccent,
                               fontSize: 10,

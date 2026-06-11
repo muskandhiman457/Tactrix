@@ -414,6 +414,23 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
       PlayerInfo(name: 'Josh Inglis', role: 'Wicketkeeper', number: '50', nationality: 'Australia', stats: 'DNP', imageId: '14041'),
       PlayerInfo(name: 'Nathan Ellis', role: 'Bowler', number: '12', nationality: 'Australia', stats: 'DNP', imageId: '14042'),
       PlayerInfo(name: 'Ashton Agar', role: 'All-Rounder', number: '18', nationality: 'Australia', stats: 'DNP', imageId: '14043'),
+    ],
+    'pakistan': [
+      PlayerInfo(name: 'Babar Azam', role: 'Batter', number: '56', nationality: 'Pakistan', stats: 'T20I Runs: 4145, Avg: 41.0', imageId: '8097'),
+      PlayerInfo(name: 'Mohammad Rizwan', role: 'Wicketkeeper', number: '16', nationality: 'Pakistan', stats: 'T20I Runs: 3313, Avg: 48.7', imageId: '8179'),
+      PlayerInfo(name: 'Saim Ayub', role: 'Batter', number: '63', nationality: 'Pakistan', stats: 'T20I Strike Rate: 138.2', imageId: '16281'),
+      PlayerInfo(name: 'Fakhar Zaman', role: 'Batter', number: '39', nationality: 'Pakistan', stats: 'T20I Strike Rate: 132.9', imageId: '10747'),
+      PlayerInfo(name: 'Usman Khan', role: 'Batter', number: '72', nationality: 'Pakistan', stats: 'Runs: 120, SR: 135.0', imageId: '18534'),
+      PlayerInfo(name: 'Iftikhar Ahmed', role: 'All-Rounder', number: '95', nationality: 'Pakistan', stats: 'Wickets: 7, Runs: 915', imageId: '8093'),
+      PlayerInfo(name: 'Imad Wasim', role: 'All-Rounder', number: '9', nationality: 'Pakistan', stats: 'Wickets: 65, Econ: 6.26', imageId: '8095'),
+      PlayerInfo(name: 'Shadab Khan', role: 'All-Rounder', number: '7', nationality: 'Pakistan', stats: 'Wickets: 104, Runs: 304', imageId: '10749'),
+      PlayerInfo(name: 'Shaheen Afridi', role: 'Bowler', number: '10', nationality: 'Pakistan', stats: 'Wickets: 91, Econ: 7.67', imageId: '10751'),
+      PlayerInfo(name: 'Naseem Shah', role: 'Bowler', number: '71', nationality: 'Pakistan', stats: 'Wickets: 24, Econ: 7.30', imageId: '13617'),
+      PlayerInfo(name: 'Haris Rauf', role: 'Bowler', number: '97', nationality: 'Pakistan', stats: 'Wickets: 98, Econ: 8.02', imageId: '13619'),
+      PlayerInfo(name: 'Azam Khan', role: 'Wicketkeeper', number: '77', nationality: 'Pakistan', stats: 'DNP', imageId: '16283'),
+      PlayerInfo(name: 'Abbas Afridi', role: 'Bowler', number: '40', nationality: 'Pakistan', stats: 'DNP', imageId: '16285'),
+      PlayerInfo(name: 'Abrar Ahmed', role: 'Bowler', number: '82', nationality: 'Pakistan', stats: 'DNP', imageId: '16287'),
+      PlayerInfo(name: 'Mohammad Amir', role: 'Bowler', number: '5', nationality: 'Pakistan', stats: 'DNP', imageId: '8091'),
     ]
   };
 
@@ -528,6 +545,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
       'lsg': ['lucknow super giants', 'lsg', 'lucknow'],
       'ind': ['india', 'ind'],
       'aus': ['australia', 'aus'],
+      'pak': ['pakistan', 'pak'],
     };
 
     for (var entry in abbreviations.entries) {
@@ -584,6 +602,9 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
       return [
         PlayerInfo(name: 'Bench Player 1', role: 'Raider', number: '8', nationality: 'Indian', stats: 'DNP'),
         PlayerInfo(name: 'Bench Player 2', role: 'Defender', number: '9', nationality: 'Indian', stats: 'DNP'),
+        PlayerInfo(name: 'Bench Player 3', role: 'Defender', number: '10', nationality: 'Indian', stats: 'DNP'),
+        PlayerInfo(name: 'Bench Player 4', role: 'Raider', number: '11', nationality: 'Indian', stats: 'DNP'),
+        PlayerInfo(name: 'Bench Player 5', role: 'Defender', number: '12', nationality: 'Indian', stats: 'DNP'),
       ];
     }
     return [
@@ -616,6 +637,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
     if (cleaned == 'pbks' || cleaned == 'pk' || cleaned.contains('punjab')) return _teamSquads['punjab kings']!;
     if (cleaned == 'ind' || cleaned == 'india') return _teamSquads['india']!;
     if (cleaned == 'aus' || cleaned == 'australia') return _teamSquads['australia']!;
+    if (cleaned == 'pak' || cleaned == 'pakistan') return _teamSquads['pakistan']!;
 
     if (cleaned.contains('real') || (cleaned.contains('madrid') && !cleaned.contains('atletico'))) return _teamSquads['real madrid']!;
     if (cleaned.contains('atletico')) return _teamSquads['atletico madrid']!;
@@ -632,7 +654,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
     final isKabaddi = widget.isKabaddi || cleaned == 'pat' || cleaned == 'mum' || cleaned == 'jai' || cleaned == 'blr' || cleaned == 'del' || cleaned == 'pun' ||
                       cleaned.contains('pirates') || cleaned.contains('mumba') || cleaned.contains('panthers') || cleaned.contains('bulls') || cleaned.contains('paltan');
 
-    final size = isKabaddi ? 9 : 15;
+    final size = isKabaddi ? 12 : 15;
     return List.generate(size, (index) {
       if (isCricket) {
         String role = 'Batter';
@@ -643,10 +665,15 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
         } else if (index >= 7 && index < 11) {
           role = 'Bowler';
         } else {
-          if (index == 11) role = 'Wicketkeeper';
-          else if (index == 12) role = 'Batter';
-          else if (index == 13) role = 'All-Rounder';
-          else role = 'Bowler';
+          if (index == 11) {
+            role = 'Wicketkeeper';
+          } else if (index == 12) {
+            role = 'Batter';
+          } else if (index == 13) {
+            role = 'All-Rounder';
+          } else {
+            role = 'Bowler';
+          }
         }
         return PlayerInfo(
           name: 'Player ${index + 1}',
@@ -666,8 +693,11 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
         } else if (index == 6) {
           role = 'Defender - Right Cover';
         } else {
-          if (index == 7) role = 'Raider';
-          else role = 'Defender';
+          if (index == 7) {
+            role = 'Raider';
+          } else {
+            role = 'Defender';
+          }
         }
         return PlayerInfo(
           name: 'Player ${index + 1}',
@@ -685,10 +715,15 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
         } else if (index >= 8 && index < 11) {
           role = 'FW';
         } else {
-          if (index == 11) role = 'GK';
-          else if (index == 12) role = 'DF';
-          else if (index == 13) role = 'MF';
-          else role = 'FW';
+          if (index == 11) {
+            role = 'GK';
+          } else if (index == 12) {
+            role = 'DF';
+          } else if (index == 13) {
+            role = 'MF';
+          } else {
+            role = 'FW';
+          }
         }
         return PlayerInfo(
           name: 'Player ${index + 1}',

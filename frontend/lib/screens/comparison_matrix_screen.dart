@@ -55,7 +55,7 @@ class ComparisonMatrixScreen extends StatelessWidget {
     final statsA = _getPlayerStats(playerA);
     final statsB = _getPlayerStats(playerB);
     final impactA = (playerAContribution['impact_score'] as num?)?.toDouble() ?? 8.0;
-    final impactB = (playerBContribution['impact_score']?.toDouble() ?? 8.0);
+    final impactB = (playerBContribution['impact_score'] as num?)?.toDouble() ?? 8.0;
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
@@ -142,8 +142,15 @@ class ComparisonMatrixScreen extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 30,
-          backgroundColor: color.withValues(alpha: 0.2),
-          child: Icon(Icons.person, color: color, size: 30),
+          backgroundColor: color.withValues(alpha: 0.15),
+          child: Text(
+            name.isNotEmpty ? name[0].toUpperCase() : '?',
+            style: GoogleFonts.outfit(
+              color: color,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
         const SizedBox(height: 8),
         Text(
@@ -295,8 +302,8 @@ class ComparisonMatrixScreen extends StatelessWidget {
   }
 
   Widget _buildDualBarChartCard() {
-    final scoreA = playerAContribution['impact_score']?.toDouble() ?? 8.0;
-    final scoreB = playerBContribution['impact_score']?.toDouble() ?? 8.0;
+    final scoreA = (playerAContribution['impact_score'] as num?)?.toDouble() ?? 8.0;
+    final scoreB = (playerBContribution['impact_score'] as num?)?.toDouble() ?? 8.0;
     final contribA = (scoreA / (scoreA + scoreB)) * 100;
     final contribB = (scoreB / (scoreA + scoreB)) * 100;
 
@@ -426,43 +433,57 @@ class ComparisonMatrixScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF00FF7F), shape: BoxShape.circle)),
-                      const SizedBox(width: 6),
-                      Text(
-                        playerA.length > 12 ? '${playerA.substring(0, 10)}..' : playerA,
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${contribA.toStringAsFixed(1)}%',
-                    style: GoogleFonts.outfit(color: const Color(0xFF00FF7F), fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
+              Expanded(
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF00FF7F), shape: BoxShape.circle)),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            playerA,
+                            style: GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${contribA.toStringAsFixed(1)}%',
+                      style: GoogleFonts.outfit(color: const Color(0xFF00FF7F), fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
               ),
-              Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.blueAccent, shape: BoxShape.circle)),
-                      const SizedBox(width: 6),
-                      Text(
-                        playerB.length > 12 ? '${playerB.substring(0, 10)}..' : playerB,
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${contribB.toStringAsFixed(1)}%',
-                    style: GoogleFonts.outfit(color: Colors.blueAccent, fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
+              Expanded(
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.blueAccent, shape: BoxShape.circle)),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            playerB,
+                            style: GoogleFonts.inter(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${contribB.toStringAsFixed(1)}%',
+                      style: GoogleFonts.outfit(color: Colors.blueAccent, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

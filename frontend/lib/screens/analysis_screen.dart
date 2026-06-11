@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:easy_localization/easy_localization.dart';
 import '../services/api_config.dart';
 import 'comparison_matrix_screen.dart';
 
@@ -500,8 +501,8 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     ];
   }
 
-  List<double> _getPlayerMetrics(String playerName) {
-    final hash = playerName.hashCode.abs();
+  List<double> _getTeamMetrics(String teamName) {
+    final hash = teamName.hashCode.abs();
     return [
       (60 + (hash % 41)).toDouble(),
       (30 + ((hash ~/ 3) % 61)).toDouble(),
@@ -542,7 +543,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          'ANALYTICS',
+          'analytics_title'.tr(),
           style: GoogleFonts.outfit(
             fontWeight: FontWeight.bold,
             letterSpacing: 2,
@@ -573,12 +574,12 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                     const SizedBox(height: 24),
                     _buildRadarChartCard(),
                   ] else ...[
-                    const SizedBox(
+                    SizedBox(
                       height: 200,
                       child: Center(
                         child: Text(
-                          'No live or upcoming matches available.',
-                          style: TextStyle(color: Colors.grey),
+                          'no_live_upcoming_matches'.tr(),
+                          style: const TextStyle(color: Colors.grey),
                         ),
                       ),
                     )
@@ -652,7 +653,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'AI WIN PREDICTOR',
+                    'ai_win_predictor'.tr(),
                     style: GoogleFonts.outfit(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -669,7 +670,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'LIVE SIMULATION',
+                  'live_simulation'.tr(),
                   style: GoogleFonts.inter(
                     color: const Color(0xFF00FF7F),
                     fontWeight: FontWeight.bold,
@@ -770,7 +771,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'AI INSIGHT & MOMENTUM SHIFT',
+                        'ai_insight_momentum_shift'.tr(),
                         style: GoogleFonts.inter(
                           color: const Color(0xFF00FF7F),
                           fontWeight: FontWeight.bold,
@@ -803,7 +804,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'MATCH SELECTION HUB',
+          'match_selection_hub'.tr(),
           style: GoogleFonts.inter(
             color: Colors.grey[400],
             fontWeight: FontWeight.bold,
@@ -813,7 +814,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 140,
+          height: 125,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: _matches.length,
@@ -830,8 +831,8 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 onTap: () => _selectMatch(match),
                 child: Container(
                   width: 190,
-                  margin: const EdgeInsets.only(right: 12),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  margin: const EdgeInsets.only(right: 12, bottom: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1E1E1E),
                     borderRadius: BorderRadius.circular(16),
@@ -855,7 +856,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildTeamLogoAvatar(team1, 18),
+                          _buildTeamLogoAvatar(team1, 16),
                           Text(
                             'VS',
                             style: GoogleFonts.outfit(
@@ -864,7 +865,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                               fontSize: 10,
                             ),
                           ),
-                          _buildTeamLogoAvatar(team2, 18),
+                          _buildTeamLogoAvatar(team2, 16),
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -879,7 +880,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                       ),
                       const SizedBox(height: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: isLive ? Colors.redAccent.withValues(alpha: 0.2) : const Color(0xFF00FF7F).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
@@ -928,7 +929,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isLive ? 'LIVE PERFORMANCE TREND' : 'RECENT PERFORMANCE TREND',
+                isLive ? 'live_performance_trend'.tr() : 'recent_performance_trend'.tr(),
                 style: GoogleFonts.inter(
                   color: Colors.grey[400],
                   fontWeight: FontWeight.bold,
@@ -944,7 +945,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  isLive ? 'Over-by-Over Live Index' : 'Last 5 Games Form Curve',
+                  isLive ? 'over_by_over_live_index'.tr() : 'last_5_games_form_curve'.tr(),
                   style: GoogleFonts.inter(
                     color: isLive ? Colors.redAccent : const Color(0xFF00FF7F),
                     fontWeight: FontWeight.bold,
@@ -1130,7 +1131,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'H2H PLAYER PROFILES',
+              'h2h_player_profiles'.tr(),
               style: GoogleFonts.inter(
                 color: Colors.grey[400],
                 fontWeight: FontWeight.bold,
@@ -1176,7 +1177,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'H2H PLAYER PROFILES',
+            'h2h_player_profiles'.tr(),
             style: GoogleFonts.inter(
               color: Colors.grey[400],
               fontWeight: FontWeight.bold,
@@ -1250,7 +1251,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         },
         icon: const Icon(Icons.compare_arrows, fontWeight: FontWeight.bold),
         label: Text(
-          'COMPARE PLAYERS',
+          'compare_players'.tr(),
           style: GoogleFonts.outfit(
             fontWeight: FontWeight.bold,
             fontSize: 14,
@@ -1345,45 +1346,53 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
-                  Wrap(
-                    spacing: 4,
-                    runSpacing: 4,
+                  Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: selectedPlayerAStatus == 'ACTIVE'
-                              ? const Color(0xFF00FF7F).withValues(alpha: 0.2)
-                              : Colors.orangeAccent.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          selectedPlayerAStatus, 
-                          style: GoogleFonts.inter(
-                            color: selectedPlayerAStatus == 'ACTIVE'
-                                ? const Color(0xFF00FF7F)
-                                : Colors.orangeAccent, 
-                            fontSize: 8, 
-                            fontWeight: FontWeight.bold
-                          ),
-                        ),
-                      ),
-                      if (selectedPlayerAIsCaptain)
-                        Container(
+                      Flexible(
+                        child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.amber.withValues(alpha: 0.2),
+                            color: selectedPlayerAStatus == 'ACTIVE'
+                                ? const Color(0xFF00FF7F).withValues(alpha: 0.2)
+                                : Colors.orangeAccent.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            'CAPTAIN 🧢',
+                            selectedPlayerAStatus,
                             style: GoogleFonts.inter(
-                              color: Colors.amber, 
-                              fontSize: 8, 
-                              fontWeight: FontWeight.bold
+                              color: selectedPlayerAStatus == 'ACTIVE'
+                                  ? const Color(0xFF00FF7F)
+                                  : Colors.orangeAccent,
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ),
+                      if (selectedPlayerAIsCaptain) ...[
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'CAPTAIN 🧢',
+                              style: GoogleFonts.inter(
+                                color: Colors.amber,
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ),
+                      ],
                     ],
                   ),
                 ],
@@ -1481,43 +1490,51 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
-                  Wrap(
-                    spacing: 4,
-                    runSpacing: 4,
+                  Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.blueAccent.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          selectedPlayerBStatus, 
-                          style: GoogleFonts.inter(
-                            color: selectedPlayerBStatus == 'ACTIVE'
-                                ? Colors.blueAccent
-                                : Colors.orangeAccent, 
-                            fontSize: 8, 
-                            fontWeight: FontWeight.bold
-                          ),
-                        ),
-                      ),
-                      if (selectedPlayerBIsCaptain)
-                        Container(
+                      Flexible(
+                        child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.amber.withValues(alpha: 0.2),
+                            color: Colors.blueAccent.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            'CAPTAIN 🧢',
+                            selectedPlayerBStatus,
                             style: GoogleFonts.inter(
-                              color: Colors.amber, 
-                              fontSize: 8, 
-                              fontWeight: FontWeight.bold
+                              color: selectedPlayerBStatus == 'ACTIVE'
+                                  ? Colors.blueAccent
+                                  : Colors.orangeAccent,
+                              fontSize: 8,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ),
+                      if (selectedPlayerBIsCaptain) ...[
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'CAPTAIN 🧢',
+                              style: GoogleFonts.inter(
+                                color: Colors.amber,
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           ),
                         ),
+                      ],
                     ],
                   ),
                 ],
@@ -1541,8 +1558,8 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     final team1S = info['team1']?['teamSName'] ?? team1;
     final team2S = info['team2']?['teamSName'] ?? team2;
 
-    final metricsA = _getPlayerMetrics(team1);
-    final metricsB = _getPlayerMetrics(team2);
+    final metricsA = _getTeamMetrics(team1);
+    final metricsB = _getTeamMetrics(team2);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -1555,7 +1572,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'FANTASY ATTRIBUTE MATRIX (TEAMS)',
+            'TEAMS ATTRIBUTE MATRIX',
             style: GoogleFonts.inter(
               color: Colors.grey[400],
               fontWeight: FontWeight.bold,

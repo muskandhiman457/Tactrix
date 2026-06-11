@@ -1,15 +1,19 @@
 import json
 import os
 import re
+import time
 import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
 import hashlib
+import concurrent.futures
 from datetime import datetime
 from email.utils import parsedate_to_datetime
 from typing import List, Dict, Optional
 from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException
+from googlenewsdecoder import new_decoderv1
+
 
 router = APIRouter(
     prefix="/api/community",
@@ -26,6 +30,20 @@ class CommentSchema(BaseModel):
     content: str
     time: str
 
+class PollSchema(BaseModel):
+    question: str
+    options: List[str]
+    votes: List[int]
+    userVotedIndex: Optional[int] = -1
+
+class LineupSchema(BaseModel):
+    teamName: str
+    sport: str
+    formation: str
+    captain: str
+    viceCaptain: str
+    players: List[str]
+
 class PostSchema(BaseModel):
     id: str
     name: str
@@ -35,11 +53,17 @@ class PostSchema(BaseModel):
     likes: int
     liked_by: List[str] = [] # User handles who liked this post
     comments: List[CommentSchema] = []
+    poll: Optional[PollSchema] = None
+    lineup: Optional[LineupSchema] = None
+    badges: Optional[List[dict]] = []
 
 class CreatePostRequest(BaseModel):
     name: str
     handle: str
     content: str
+    poll: Optional[PollSchema] = None
+    lineup: Optional[LineupSchema] = None
+    badges: Optional[List[dict]] = []
 
 class CreateCommentRequest(BaseModel):
     name: str
@@ -71,6 +95,70 @@ DEFAULT_POSTS = [
                 "content": "MI bowled poorly in the last 2 overs.",
                 "time": "45m ago"
             }
+        ],
+        "badges": [
+            {
+                "id": "top_predictor",
+                "badge_name": "Top Predictor",
+                "badge_icon_url": "https://img.icons8.com/color/48/star--v1.png",
+                "badge_type": "performance",
+                "assigned_at": "2026-06-01T12:00:00Z",
+                "description": "Top Predictor - Assigned for 75%+ accurate match predictions"
+            }
+        ]
+    },
+    {
+        "id": "poll_post",
+        "name": "Predictor Bot",
+        "handle": "@predictor_bot",
+        "time": "1h ago",
+        "content": "Who will score more fantasy points tonight in RCB vs GT? Vote now! 📊 #RCBvGT",
+        "likes": 42,
+        "liked_by": [],
+        "comments": [],
+        "poll": {
+            "question": "Who will score more fantasy points tonight?",
+            "options": ["Virat Kohli", "Shubman Gill", "Rashid Khan"],
+            "votes": [145, 98, 54],
+            "userVotedIndex": -1
+        },
+        "badges": [
+            {
+                "id": "top_predictor",
+                "badge_name": "Top Predictor",
+                "badge_icon_url": "https://img.icons8.com/color/48/star--v1.png",
+                "badge_type": "performance",
+                "assigned_at": "2026-06-01T12:00:00Z",
+                "description": "Top Predictor - Assigned for 75%+ accurate match predictions"
+            }
+        ]
+    },
+    {
+        "id": "lineup_post",
+        "name": "Pro Analyst",
+        "handle": "@pro_analyst",
+        "time": "3h ago",
+        "content": "Here is my ultimate combination for the upcoming IPL match. The bowling lineup looks lethal. Let me know your thoughts! 🏏🔥 #DreamTeam #IPL2026",
+        "likes": 56,
+        "liked_by": [],
+        "comments": [],
+        "lineup": {
+            "teamName": "Lethal Bowling XI",
+            "sport": "Cricket",
+            "formation": "Balanced (1-4-2-4)",
+            "captain": "Virat Kohli",
+            "viceCaptain": "Jasprit Bumrah",
+            "players": ["MS Dhoni (WK)", "Virat Kohli", "Rohit Sharma", "Suryakumar Yadav", "Shivam Dube", "Hardik Pandya", "Ravindra Jadeja", "Jasprit Bumrah", "Mohammed Siraj", "Yash Dayal", "Yuzvendra Chahal"]
+        },
+        "badges": [
+            {
+                "id": "super_chatter",
+                "badge_name": "Super Chatter",
+                "badge_icon_url": "https://img.icons8.com/color/48/chat--v1.png",
+                "badge_type": "engagement",
+                "assigned_at": "2026-06-01T12:00:00Z",
+                "description": "Super Chatter - Assigned for reaching high chat activity score"
+            }
         ]
     },
     {
@@ -89,7 +177,8 @@ DEFAULT_POSTS = [
                 "content": "Best striker in the world right now, no debate.",
                 "time": "3h ago"
             }
-        ]
+        ],
+        "badges": []
     },
     {
         "id": "3",
@@ -99,7 +188,8 @@ DEFAULT_POSTS = [
         "content": "That last raid in the Kabaddi finals was mindblowing. Speed, agility, and pure power. That is how champions play! ⚡🦁 #Kabaddi #ProKabaddi",
         "likes": 76,
         "liked_by": [],
-        "comments": []
+        "comments": [],
+        "badges": []
     }
 ]
 
@@ -163,18 +253,36 @@ def get_posts():
 def create_post(req: CreatePostRequest):
     posts = load_posts()
     new_post = {
-        "id": str(len(posts) + 1),
+        "id": f"p_{len(posts) + 1}_{int(datetime.now().timestamp())}",
         "name": req.name,
         "handle": req.handle,
         "time": "Just now",
         "content": req.content,
         "likes": 0,
         "liked_by": [],
-        "comments": []
+        "comments": [],
+        "poll": req.poll.dict() if req.poll else None,
+        "lineup": req.lineup.dict() if req.lineup else None,
+        "badges": req.badges if req.badges else []
     }
     posts.insert(0, new_post) # Add to the top of feed
     save_posts(posts)
     return new_post
+
+@router.post("/posts/{post_id}/vote", response_model=PostSchema)
+def vote_poll(post_id: str, index: int, handle: str = "@sports_fan"):
+    posts = load_posts()
+    for post in posts:
+        if post["id"] == post_id:
+            if "poll" in post and post["poll"]:
+                votes = post["poll"]["votes"]
+                if index >= 0 and index < len(votes):
+                    # We can directly increment the vote
+                    votes[index] += 1
+                    post["poll"]["userVotedIndex"] = index
+                    save_posts(posts)
+                    return post
+    raise HTTPException(status_code=404, detail="Post or poll not found")
 
 @router.post("/posts/{post_id}/like", response_model=PostSchema)
 def toggle_like(post_id: str, handle: str = "@alex_champ"):
@@ -274,6 +382,118 @@ def get_category_from_text(title: str, summary: str, default_sports: List[str]) 
         return default_sports[0].capitalize()
     return "Sports"
 
+# In-memory news cache: { cache_key: (timestamp, articles) }
+NEWS_CACHE: Dict[str, tuple] = {}
+CACHE_DURATION_SECONDS = 600
+NEWS_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=20)
+
+
+def scrape_og_image(url: str) -> Optional[str]:
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=3) as response:
+            html = response.read().decode('utf-8', errors='ignore')
+            
+        og_image_match = re.search(r'<meta\s+[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']', html)
+        if not og_image_match:
+            og_image_match = re.search(r'<meta\s+[^>]*content=["\']([^"\']+)["\'][^>]*property=["\']og:image["\']', html)
+            
+        og_image = og_image_match.group(1) if og_image_match else None
+        return og_image
+    except Exception:
+        return None
+
+def process_feed_item(item, default_sports: List[str]) -> dict:
+    title = item.find('title').text if item.find('title') is not None else ''
+    google_url = item.find('link').text if item.find('link') is not None else ''
+    pub_date = item.find('pubDate').text if item.find('pubDate') is not None else ''
+    description = item.find('description').text if item.find('description') is not None else ''
+    
+    clean_title = title
+    source = "Google News"
+    if " - " in title:
+        parts = title.rsplit(" - ", 1)
+        clean_title = parts[0]
+        source = parts[1]
+        
+    clean_desc = clean_html(description)
+    if "Google News" in clean_desc:
+        clean_desc = clean_desc.split("Google News")[0].strip()
+        
+    if not clean_desc or len(clean_desc) < 10:
+        clean_desc = f"Latest updates and match coverage regarding {clean_title}."
+        
+    if len(clean_desc) > 180:
+        clean_desc = clean_desc[:177] + "..."
+        
+    news_id = "n_rss_" + hashlib.md5(google_url.encode('utf-8')).hexdigest()[:8]
+    category = get_category_from_text(clean_title, clean_desc, default_sports)
+    
+    real_url = google_url
+    image_url = None
+    
+    # Try decoding the Google News link to target URL
+    try:
+        decoded = new_decoderv1(google_url, interval=0)
+        if decoded.get("status"):
+            real_url = decoded.get("decoded_url")
+            # Scrape original image from resolved URL
+            image_url = scrape_og_image(real_url)
+    except Exception as e:
+        print(f"Error decoding Google News URL: {e}")
+        
+    # Fallback to category placeholder if image scraping failed
+    if not image_url:
+        image_url = get_unsplash_image(clean_title, category)
+        
+    return {
+        "id": news_id,
+        "title": clean_title,
+        "summary": clean_desc,
+        "time": format_relative_time(pub_date),
+        "category": category,
+        "imageUrl": image_url,
+        "link": real_url
+    }
+
+def process_feed_item_fallback(item, default_sports: List[str]) -> dict:
+    title = item.find('title').text if item.find('title') is not None else ''
+    google_url = item.find('link').text if item.find('link') is not None else ''
+    pub_date = item.find('pubDate').text if item.find('pubDate') is not None else ''
+    description = item.find('description').text if item.find('description') is not None else ''
+    
+    clean_title = title
+    if " - " in title:
+        parts = title.rsplit(" - ", 1)
+        clean_title = parts[0]
+        
+    clean_desc = clean_html(description)
+    if "Google News" in clean_desc:
+        clean_desc = clean_desc.split("Google News")[0].strip()
+        
+    if not clean_desc or len(clean_desc) < 10:
+        clean_desc = f"Latest updates and match coverage regarding {clean_title}."
+        
+    if len(clean_desc) > 180:
+        clean_desc = clean_desc[:177] + "..."
+        
+    news_id = "n_rss_" + hashlib.md5(google_url.encode('utf-8')).hexdigest()[:8]
+    category = get_category_from_text(clean_title, clean_desc, default_sports)
+    image_url = get_unsplash_image(clean_title, category)
+    
+    return {
+        "id": news_id,
+        "title": clean_title,
+        "summary": clean_desc,
+        "time": format_relative_time(pub_date),
+        "category": category,
+        "imageUrl": image_url,
+        "link": google_url
+    }
+
 def fetch_personalized_news(sports_str: Optional[str], players_str: Optional[str]) -> List[dict]:
     terms = []
     default_sports = []
@@ -293,9 +513,20 @@ def fetch_personalized_news(sports_str: Optional[str], players_str: Optional[str
                 terms.append(p)
                 
     if not terms:
-        return DEFAULT_NEWS
+        # Default query terms if no favorites exist
+        terms = ["sports"]
         
     query = f"({ ' OR '.join(terms) }) sports"
+    
+    # Check cache first
+    now = time.time()
+    cache_key = f"{sports_str}_{players_str}"
+    if cache_key in NEWS_CACHE:
+        timestamp, cached_articles = NEWS_CACHE[cache_key]
+        if now - timestamp < CACHE_DURATION_SECONDS:
+            print(f"Returning cached news for: {cache_key}")
+            return cached_articles
+            
     encoded_query = urllib.parse.quote(query)
     url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-IN&gl=IN&ceid=IN:en"
     
@@ -309,54 +540,128 @@ def fetch_personalized_news(sports_str: Optional[str], players_str: Optional[str
             xml_data = response.read()
             
         root = ET.fromstring(xml_data)
-        articles = []
+        items = root.findall('.//item')[:6] # Top 6 items
         
-        for item in root.findall('.//item')[:12]:
-            title = item.find('title').text if item.find('title') is not None else ''
-            link = item.find('link').text if item.find('link') is not None else ''
-            pub_date = item.find('pubDate').text if item.find('pubDate') is not None else ''
-            description = item.find('description').text if item.find('description') is not None else ''
+        articles = []
+        if items:
+            # Concurrently submit feed item processing to global executor
+            futures = {NEWS_EXECUTOR.submit(process_feed_item, item, default_sports): item for item in items}
+            # Wait for up to 3.5 seconds
+            done, not_done = concurrent.futures.wait(futures.keys(), timeout=3.5)
             
-            clean_title = title
-            if " - " in title:
-                parts = title.rsplit(" - ", 1)
-                clean_title = parts[0]
-                
-            clean_desc = clean_html(description)
-            if "Google News" in clean_desc:
-                clean_desc = clean_desc.split("Google News")[0].strip()
-                
-            if not clean_desc or len(clean_desc) < 10:
-                clean_desc = f"Latest updates and match coverage regarding {clean_title}."
-                
-            if len(clean_desc) > 180:
-                clean_desc = clean_desc[:177] + "..."
-                
-            news_id = "n_rss_" + hashlib.md5(link.encode('utf-8')).hexdigest()[:8]
-            category = get_category_from_text(clean_title, clean_desc, default_sports)
-            image_url = get_unsplash_image(clean_title, category)
+            # Retrieve completed items in order
+            item_to_future = {item: f for f, item in futures.items()}
             
-            articles.append({
-                "id": news_id,
-                "title": clean_title,
-                "summary": clean_desc,
-                "time": format_relative_time(pub_date),
-                "category": category,
-                "imageUrl": image_url,
-                "link": link
-            })
-            
+            for item in items:
+                f = item_to_future[item]
+                if f in done:
+                    try:
+                        art = f.result()
+                        if art:
+                            articles.append(art)
+                    except Exception as e:
+                        print(f"Error processing news item: {e}")
+                        articles.append(process_feed_item_fallback(item, default_sports))
+                else:
+                    # Timed out, use fallback
+                    f.cancel()
+                    articles.append(process_feed_item_fallback(item, default_sports))
+
+                        
+        # Filter out empty or failed articles
+        articles = [a for a in articles if a]
+        
         if not articles:
             return DEFAULT_NEWS
             
-        if len(articles) < 4:
-            articles.extend(DEFAULT_NEWS[:4 - len(articles)])
-            
+        # Cache the fetched articles
+        NEWS_CACHE[cache_key] = (now, articles)
         return articles
     except Exception as e:
         print(f"Error fetching personalized news: {e}")
+        if cache_key in NEWS_CACHE:
+            return NEWS_CACHE[cache_key][1]
         return DEFAULT_NEWS
+
+
 
 @router.get("/news")
 def get_news(sports: Optional[str] = None, players: Optional[str] = None):
     return fetch_personalized_news(sports, players)
+
+# Dynamic User Badge Assignment System
+db = None
+try:
+    import firebase_admin
+    from firebase_admin import credentials, firestore
+    if not firebase_admin._apps:
+        try:
+            firebase_admin.initialize_app()
+        except Exception:
+            pass
+    db = firestore.client()
+except Exception as e:
+    print(f"Firestore Admin SDK not fully initialized: {e}")
+
+class UserBadgeMetricsRequest(BaseModel):
+    uid: str
+    prediction_accuracy_rate: float
+    chat_activity_score: int
+
+@router.post("/badges/calculate")
+def calculate_user_badges(req: UserBadgeMetricsRequest):
+    badges = []
+    now_str = datetime.now().isoformat()
+    
+    # 1. Prediction Accuracy badge
+    rate = req.prediction_accuracy_rate
+    is_top_predictor = False
+    if rate > 1.0:
+        is_top_predictor = rate > 75.0
+        pct = rate
+    else:
+        is_top_predictor = rate > 0.75
+        pct = rate * 100
+
+    if is_top_predictor:
+        badges.append({
+            "id": "top_predictor",
+            "badge_name": "Top Predictor",
+            "badge_icon_url": "https://img.icons8.com/color/48/star--v1.png",
+            "badge_type": "performance",
+            "assigned_at": now_str,
+            "description": f"Top Predictor - Assigned for {pct:.0f}% accurate match predictions"
+        })
+        
+    # 2. Chat Activity badge
+    if req.chat_activity_score > 50:
+        badges.append({
+            "id": "super_chatter",
+            "badge_name": "Super Chatter",
+            "badge_icon_url": "https://img.icons8.com/color/48/chat--v1.png",
+            "badge_type": "engagement",
+            "assigned_at": now_str,
+            "description": f"Super Chatter - Assigned for reaching high chat activity score ({req.chat_activity_score})"
+        })
+        
+    firestore_updated = False
+    if db is not None:
+        try:
+            user_ref = db.collection("users").document(req.uid)
+            user_ref.update({
+                "prediction_accuracy_rate": req.prediction_accuracy_rate,
+                "chat_activity_score": req.chat_activity_score,
+                "badges": badges
+            })
+            firestore_updated = True
+        except Exception as e:
+            print(f"Error updating Firestore user document: {e}")
+            
+    return {
+        "status": "success",
+        "uid": req.uid,
+        "prediction_accuracy_rate": req.prediction_accuracy_rate,
+        "chat_activity_score": req.chat_activity_score,
+        "badges": badges,
+        "firestore_updated": firestore_updated
+    }

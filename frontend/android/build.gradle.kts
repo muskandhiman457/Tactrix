@@ -23,7 +23,7 @@ subprojects {
     fun configureAndroid(proj: Project) {
         if (proj.extensions.findByName("android") != null) {
             proj.configure<com.android.build.gradle.BaseExtension> {
-                ndkVersion = "26.3.11579264"
+                ndkVersion = "30.0.14904198"
                 buildToolsVersion = "35.0.1"
             }
         }
