@@ -25,6 +25,7 @@ app.include_router(community.router)
 app.include_router(kabaddi.router)
 
 @app.get("/")
+@app.head("/")
 def read_root():
     return {"message": "Welcome to the Multi-Sport Analytics API"}
 

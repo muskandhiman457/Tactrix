@@ -626,8 +626,24 @@ try:
     import firebase_admin
     from firebase_admin import credentials, firestore
     if not firebase_admin._apps:
-        cred_path = "firebase_credentials.json"
-        if os.path.exists(cred_path):
+        # Auto-detect Firebase JSON file in current or parent directory
+        cred_path = None
+        for d in [".", ".."]:
+            exact_p = os.path.join(d, "firebase_credentials.json")
+            if os.path.exists(exact_p):
+                cred_path = exact_p
+                break
+            try:
+                for f in os.listdir(d):
+                    if f.endswith(".json") and ("adminsdk" in f.lower() or "firebase" in f.lower() or f.startswith("sports-hub-")):
+                        cred_path = os.path.join(d, f)
+                        break
+            except Exception:
+                pass
+            if cred_path:
+                break
+                
+        if cred_path:
             print(f"Initializing Firebase with certificate: {cred_path}")
             cred = credentials.Certificate(cred_path)
             firebase_admin.initialize_app(cred)
