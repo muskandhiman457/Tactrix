@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -434,11 +435,110 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
     ]
   };
 
+  Timer? _pollingTimer;
+
   @override
   void initState() {
     super.initState();
     _fetchScorecardIfNeeded();
+    _startPolling();
   }
+
+  void _startPolling() {
+    if (widget.isLive) {
+      _pollingTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+        if (mounted) {
+          _fetchScorecardSilent();
+        }
+      });
+    }
+  }
+
+  Future<void> _fetchScorecardSilent() async {
+    if (widget.matchId == null) return;
+    try {
+      final path = widget.isCricket
+          ? '/api/cricket/match/${widget.matchId}/scorecard'
+          : widget.isKabaddi
+              ? '/api/kabaddi/match/${widget.matchId}/scorecard'
+              : '/api/football/match/${widget.matchId}/scorecard';
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}$path'),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          final Map<String, dynamic>? teamsData = data['teams'];
+          final Map<String, dynamic>? liveStateData = data['liveState'];
+          
+          final Map<String, List<PlayerInfo>> loadedSquads = {};
+          final Map<String, List<PlayerInfo>> loadedPlayingXIs = {};
+          final Map<String, List<PlayerInfo>> loadedBenches = {};
+
+          if (teamsData != null) {
+            teamsData.forEach((teamName, details) {
+              final String cleanedName = teamName.toLowerCase().trim();
+              
+              // Load players
+              final List<dynamic> playersList = details['players'] ?? [];
+              loadedSquads[cleanedName] = playersList.map((p) {
+                return PlayerInfo(
+                  name: p['name'] ?? 'Unknown',
+                  role: p['role'] ?? 'Player',
+                  number: p['number']?.toString() ?? '0',
+                  nationality: p['nationality'] ?? 'International',
+                  stats: p['stats'] ?? '',
+                  imageId: p['imageId']?.toString(),
+                );
+              }).toList();
+
+              // Load playingXI
+              final List<dynamic> playingXIList = details['playingXI'] ?? [];
+              loadedPlayingXIs[cleanedName] = playingXIList.map((p) {
+                return PlayerInfo(
+                  name: p['name'] ?? 'Unknown',
+                  role: p['role'] ?? 'Player',
+                  number: p['number']?.toString() ?? '0',
+                  nationality: p['nationality'] ?? 'International',
+                  stats: p['stats'] ?? '',
+                  imageId: p['imageId']?.toString(),
+                );
+              }).toList();
+
+              // Load bench
+              final List<dynamic> benchList = details['bench'] ?? [];
+              loadedBenches[cleanedName] = benchList.map((p) {
+                return PlayerInfo(
+                  name: p['name'] ?? 'Unknown',
+                  role: p['role'] ?? 'Player',
+                  number: p['number']?.toString() ?? '0',
+                  nationality: p['nationality'] ?? 'International',
+                  stats: p['stats'] ?? '',
+                  imageId: p['imageId']?.toString(),
+                );
+              }).toList();
+            });
+          }
+
+          if (mounted) {
+            setState(() {
+              _apiSquads = loadedSquads;
+              _apiPlayingXIs = loadedPlayingXIs;
+              _apiBenches = loadedBenches;
+              _liveState = liveStateData;
+            });
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
+
 
   Future<void> _fetchScorecardIfNeeded() async {
     if (widget.matchId == null) return;

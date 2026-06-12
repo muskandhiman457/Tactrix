@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -121,6 +122,7 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
   bool _isLoading = true;
   bool _isFootballLoading = true;
   bool _isKabaddiLoading = true;
+  Timer? _liveMatchesTimer;
 
   @override
   void initState() {
@@ -128,7 +130,25 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
     _fetchLiveCricketMatches();
     _fetchFootballMatches();
     _fetchKabaddiMatches();
+    _startLiveMatchesPolling();
   }
+
+  void _startLiveMatchesPolling() {
+    _liveMatchesTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (mounted) {
+        _fetchLiveCricketMatches();
+        _fetchFootballMatches();
+        _fetchKabaddiMatches();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _liveMatchesTimer?.cancel();
+    super.dispose();
+  }
+
 
   /// Converts a Unix millisecond timestamp to IST (UTC+5:30).
   /// Returns formatted string like "20 May, 19:30 IST"
@@ -663,7 +683,17 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
 
     if (activeMatches.isEmpty) {
       return Center(
-        child: Text('No Live or Upcoming Matches Found', style: GoogleFonts.inter(color: Colors.white)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.sports_soccer, color: Colors.grey[700], size: 64),
+            const SizedBox(height: 16),
+            Text(
+              'No Live or Upcoming Matches Found',
+              style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+          ],
+        ),
       );
     }
 
@@ -673,22 +703,38 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
       itemBuilder: (context, index) {
         final match = activeMatches[index];
         final homeTeam = match['home']?['name'] ?? 'Home Team';
+        final homeShort = match['home']?['short'] ?? homeTeam[0];
         final awayTeam = match['away']?['name'] ?? 'Away Team';
+        final awayShort = match['away']?['short'] ?? awayTeam[0];
         final homeTeamId = match['home']?['id'];
         final awayTeamId = match['away']?['id'];
         
         final statusObj = match['status'];
         final isFinished = statusObj?['finished'] ?? false;
         final notStarted = match['notStarted'] ?? false;
-        final statusText = statusObj?['reason']?['long'] ?? (notStarted ? 'Not Started' : 'Live');
         
-        final homeScore = match['home']?['score']?.toString() ?? '-';
-        final awayScore = match['away']?['score']?.toString() ?? '-';
+        final homeScore = match['home']?['score']?.toString() ?? '0';
+        final awayScore = match['away']?['score']?.toString() ?? '0';
         
         final homeLogoUrl = homeTeamId != null ? 'https://images.fotmob.com/image_resources/logo/teamlogo/$homeTeamId.png' : null;
         final awayLogoUrl = awayTeamId != null ? 'https://images.fotmob.com/image_resources/logo/teamlogo/$awayTeamId.png' : null;
 
-        final tourneyName = match['tournamentName'] ?? 'Champions League';
+        final tourneyName = match['tournamentName'] ?? 'FIFA World Cup 2026';
+        final venue = match['venue'] ?? '';
+
+        final isLive = !isFinished && !notStarted;
+        final isUpcoming = notStarted;
+
+        // Start time formatting
+        final startMs = match['startDate'];
+        final istTime = startMs != null ? _toIST(startMs) : '';
+        final statusText = statusObj?['reason']?['long'] ?? (isLive ? 'Live' : 'Upcoming');
+        
+        final displayStatus = isUpcoming && istTime.isNotEmpty
+            ? 'starts_at'.tr(namedArgs: {'time': istTime})
+            : (isLive ? '● ${'live'.tr().toUpperCase()} — $statusText' : statusText);
+
+        final scoreText = isFinished ? '$homeScore - $awayScore' : (isUpcoming ? 'VS' : '$homeScore - $awayScore');
 
         return GestureDetector(
           onTap: () {
@@ -700,10 +746,10 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
                   awayTeam: awayTeam,
                   homeLogoUrl: homeLogoUrl,
                   awayLogoUrl: awayLogoUrl,
-                  statusText: statusText.toUpperCase(),
-                  scoreText: isFinished ? '$homeScore - $awayScore' : (notStarted ? 'VS' : '$homeScore - $awayScore'),
-                  isLive: !isFinished && !notStarted,
-                  venue: match['venue'] ?? tourneyName,
+                  statusText: isLive ? '● LIVE - $statusText' : displayStatus,
+                  scoreText: scoreText,
+                  isLive: isLive,
+                  venue: venue,
                   isCricket: false,
                   isKabaddi: false,
                   matchId: match['id']?.toString(),
@@ -717,135 +763,239 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
             decoration: BoxDecoration(
               color: const Color(0xFF1E1E1E),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey[800]!),
+              border: Border.all(
+                color: isLive ? Colors.redAccent.withValues(alpha: 0.4) : Colors.grey[800]!,
+                width: isLive ? 1.5 : 1.0,
+              ),
+              boxShadow: isLive
+                  ? [BoxShadow(color: Colors.redAccent.withValues(alpha: 0.08), blurRadius: 12, spreadRadius: 1)]
+                  : [],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Header: Live/Upcoming badge + tournament name
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: isFinished 
-                            ? Colors.grey[800]!.withValues(alpha: 0.4)
-                            : (notStarted ? Colors.blueAccent.withValues(alpha: 0.2) : Colors.redAccent.withValues(alpha: 0.2)),
-                        borderRadius: BorderRadius.circular(4),
+                        color: isLive
+                            ? Colors.redAccent.withValues(alpha: 0.2)
+                            : Colors.blueAccent.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isLive) ...[
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: Colors.redAccent,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                          ],
+                          Text(
+                            isLive ? 'live'.tr().toUpperCase() : 'upcoming'.tr().toUpperCase(),
+                            style: GoogleFonts.inter(
+                              color: isLive ? Colors.redAccent : Colors.blueAccent,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[800],
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        statusText.toUpperCase(), 
-                        style: GoogleFonts.inter(
-                          color: isFinished 
-                              ? Colors.grey[400]
-                              : (notStarted ? Colors.blueAccent : Colors.redAccent), 
-                          fontSize: 10, 
-                          fontWeight: FontWeight.bold
-                        ),
+                        'FIFA WC',
+                        style: GoogleFonts.inter(color: Colors.grey[400], fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  tourneyName,
+                  style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 10),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 14),
+                // Home Team row
+                Row(
+                  children: [
+                    homeLogoUrl != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: Image.network(
+                              homeLogoUrl,
+                              width: 28,
+                              height: 28,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => CircleAvatar(
+                                radius: 14,
+                                backgroundColor: Colors.grey[800],
+                                child: Text(
+                                  homeShort.isNotEmpty ? homeShort[0] : '?',
+                                  style: GoogleFonts.inter(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          )
+                        : CircleAvatar(
+                            radius: 14,
+                            backgroundColor: Colors.grey[800],
+                            child: Text(
+                              homeShort.isNotEmpty ? homeShort[0] : '?',
+                              style: GoogleFonts.inter(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            homeTeam,
+                            style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            homeShort,
+                            style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 11),
+                          ),
+                        ],
                       ),
                     ),
                     Text(
-                      tourneyName,
-                      style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 10),
+                      isUpcoming ? '-' : homeScore,
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // VS divider
+                Row(
+                  children: [
+                    const SizedBox(width: 38),
+                    Expanded(child: Divider(color: Colors.grey[800], height: 1)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Text(
+                        'VS',
+                        style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Expanded(child: Divider(color: Colors.grey[800], height: 1)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // Away Team row
+                Row(
+                  children: [
+                    awayLogoUrl != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(14),
+                            child: Image.network(
+                              awayLogoUrl,
+                              width: 28,
+                              height: 28,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, __, ___) => CircleAvatar(
+                                radius: 14,
+                                backgroundColor: Colors.grey[800],
+                                child: Text(
+                                  awayShort.isNotEmpty ? awayShort[0] : '?',
+                                  style: GoogleFonts.inter(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          )
+                        : CircleAvatar(
+                            radius: 14,
+                            backgroundColor: Colors.grey[800],
+                            child: Text(
+                              awayShort.isNotEmpty ? awayShort[0] : '?',
+                              style: GoogleFonts.inter(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            awayTeam,
+                            style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white70, fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            awayShort,
+                            style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      isUpcoming ? '-' : awayScore,
+                      style: GoogleFonts.inter(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    homeLogoUrl != null
-                        ? Image.network(
-                            homeLogoUrl,
-                            width: 24,
-                            height: 24,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) => CircleAvatar(
-                              radius: 12,
-                              backgroundColor: Colors.grey[800],
-                              child: Text(
-                                homeTeam.isNotEmpty ? homeTeam[0] : '?',
-                                style: const TextStyle(fontSize: 10, color: Colors.white),
-                              ),
-                            ),
-                          )
-                        : CircleAvatar(
-                            radius: 12,
-                            backgroundColor: Colors.grey[800],
-                            child: Text(
-                              homeTeam.isNotEmpty ? homeTeam[0] : '?',
-                              style: const TextStyle(fontSize: 10, color: Colors.white),
-                            ),
-                          ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        homeTeam, 
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold, 
-                          color: Colors.white,
-                          fontSize: 14
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                // Status footer
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[900],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    displayStatus,
+                    style: GoogleFonts.inter(
+                      color: isLive ? const Color(0xFF00FF7F) : (isUpcoming ? Colors.blueAccent[100] : Colors.grey[400]),
+                      fontSize: 11,
+                      fontWeight: isLive || isUpcoming ? FontWeight.bold : FontWeight.normal,
                     ),
-                    Text(
-                      homeScore, 
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.bold,
-                        color: isFinished ? Colors.grey[400] : Colors.white,
-                        fontSize: 14
-                      )
-                    ),
-                  ],
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    awayLogoUrl != null
-                        ? Image.network(
-                            awayLogoUrl,
-                            width: 24,
-                            height: 24,
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) => CircleAvatar(
-                              radius: 12,
-                              backgroundColor: Colors.grey[800],
-                              child: Text(
-                                awayTeam.isNotEmpty ? awayTeam[0] : '?',
-                                style: const TextStyle(fontSize: 10, color: Colors.white),
-                              ),
-                            ),
-                          )
-                        : CircleAvatar(
-                            radius: 12,
-                            backgroundColor: Colors.grey[800],
-                            child: Text(
-                              awayTeam.isNotEmpty ? awayTeam[0] : '?',
-                              style: const TextStyle(fontSize: 10, color: Colors.white),
-                            ),
-                          ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        awayTeam, 
-                        style: GoogleFonts.inter(
-                          fontWeight: FontWeight.bold, 
-                          color: Colors.white,
-                          fontSize: 14
+                if (venue.isNotEmpty) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on, size: 12, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          venue,
+                          style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 11),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    Text(
-                      awayScore, 
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.bold,
-                        color: isFinished ? Colors.grey[400] : Colors.white,
-                        fontSize: 14
-                      )
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

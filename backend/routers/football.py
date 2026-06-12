@@ -1,4 +1,6 @@
 import requests
+import time
+import random
 from fastapi import APIRouter
 from typing import Dict, List, Optional
 
@@ -14,11 +16,12 @@ RAPIDAPI_KEY = "a5eac63245mshc1a65cb950faebfp1c7d8ajsnc48adb31d3ee"
 MOCK_WORLD_CUP_MATCHES = [
     {
         "id": "77001",
-        "home": {"id": "6095", "name": "USA", "score": 2},
-        "away": {"id": "6088", "name": "Mexico", "score": 1},
+        "home": {"id": "6095", "name": "USA", "short": "USA", "score": 2},
+        "away": {"id": "6088", "name": "Mexico", "short": "MEX", "score": 1},
         "notStarted": False,
         "tournamentName": "FIFA World Cup 2026",
         "venue": "Azteca Stadium, Mexico City",
+        "startDate": int(time.time() * 1000) - 4500000, # started 75 mins ago
         "status": {
             "finished": False,
             "started": True,
@@ -30,11 +33,12 @@ MOCK_WORLD_CUP_MATCHES = [
     },
     {
         "id": "77002",
-        "home": {"id": "6320", "name": "Argentina", "score": 0},
-        "away": {"id": "8244", "name": "France", "score": 0},
+        "home": {"id": "6320", "name": "Argentina", "short": "ARG", "score": 0},
+        "away": {"id": "8244", "name": "France", "short": "FRA", "score": 0},
         "notStarted": True,
         "tournamentName": "FIFA World Cup 2026",
         "venue": "SoFi Stadium, Los Angeles",
+        "startDate": int(time.time() * 1000) + 7200000, # starts in 2 hours
         "status": {
             "finished": False,
             "started": False,
@@ -46,11 +50,12 @@ MOCK_WORLD_CUP_MATCHES = [
     },
     {
         "id": "77003",
-        "home": {"id": "9907", "name": "Portugal", "score": 0},
-        "away": {"id": "9906", "name": "Spain", "score": 0},
+        "home": {"id": "9907", "name": "Portugal", "short": "POR", "score": 0},
+        "away": {"id": "9906", "name": "Spain", "short": "ESP", "score": 0},
         "notStarted": True,
         "tournamentName": "FIFA World Cup 2026",
         "venue": "MetLife Stadium, NY/NJ",
+        "startDate": int(time.time() * 1000) + 86400000, # starts in 24 hours
         "status": {
             "finished": False,
             "started": False,
@@ -62,11 +67,12 @@ MOCK_WORLD_CUP_MATCHES = [
     },
     {
         "id": "77004",
-        "home": {"id": "6321", "name": "Brazil", "score": 0},
-        "away": {"id": "8498", "name": "England", "score": 0},
+        "home": {"id": "6321", "name": "Brazil", "short": "BRA", "score": 0},
+        "away": {"id": "8498", "name": "England", "short": "ENG", "score": 0},
         "notStarted": True,
         "tournamentName": "FIFA World Cup 2026",
         "venue": "Mercedes-Benz Stadium, Atlanta",
+        "startDate": int(time.time() * 1000) + 172800000, # starts in 48 hours
         "status": {
             "finished": False,
             "started": False,
@@ -78,11 +84,12 @@ MOCK_WORLD_CUP_MATCHES = [
     },
     {
         "id": "77005",
-        "home": {"id": "8148", "name": "Germany", "score": 0},
-        "away": {"id": "6175", "name": "Japan", "score": 0},
+        "home": {"id": "8148", "name": "Germany", "short": "GER", "score": 0},
+        "away": {"id": "6175", "name": "Japan", "short": "JPN", "score": 0},
         "notStarted": True,
         "tournamentName": "FIFA World Cup 2026",
         "venue": "Hard Rock Stadium, Miami",
+        "startDate": int(time.time() * 1000) + 259200000, # starts in 72 hours
         "status": {
             "finished": False,
             "started": False,
@@ -93,6 +100,7 @@ MOCK_WORLD_CUP_MATCHES = [
         }
     }
 ]
+
 
 # Database of National Teams Playing XI and Bench Rosters
 WORLD_CUP_ROSTERS = {
@@ -347,6 +355,221 @@ WORLD_CUP_ROSTERS = {
     }
 }
 
+# Live match simulation state (for USA vs Mexico, ID 77001)
+SIMULATION_STATE = {
+    "initialized": False,
+    "last_update_time": 0.0,
+    "elapsed_minutes": 72,
+    "home_score": 2,
+    "away_score": 1,
+    "events": [
+        {"time": "14'", "type": "goal", "player": "Christian Pulisic (USA)", "team": "home", "detail": "Assist by Weston McKennie"},
+        {"time": "38'", "type": "goal", "player": "Santiago Giménez (MEX)", "team": "away", "detail": "Header from a corner kick"},
+        {"time": "65'", "type": "goal", "player": "Folarin Balogun (USA)", "team": "home", "detail": "Low shot into the bottom corner"},
+        {"time": "68'", "type": "yellow", "player": "Weston McKennie (USA)", "team": "home", "detail": "Tactical foul"}
+    ],
+    "stats": {
+        "possession": {"home": 54, "away": 46},
+        "shots": {"home": 14, "away": 10},
+        "shotsOnTarget": {"home": 6, "away": 4},
+        "corners": {"home": 6, "away": 4},
+        "fouls": {"home": 11, "away": 13},
+        "saves": {"home": 3, "away": 4},
+        "offside": {"home": 2, "away": 1},
+        "yellowCards": {"home": 1, "away": 2},
+        "redCards": {"home": 0, "away": 0},
+    },
+    "player_stats": {
+        "Christian Pulisic": {"goals": 1, "shots": 4, "key_passes": 2},
+        "Folarin Balogun": {"goals": 1, "shots": 2, "key_passes": 0},
+        "Santiago Giménez": {"goals": 1, "shots": 3, "key_passes": 0},
+        "Matt Turner": {"saves": 3},
+        "Guillermo Ochoa": {"saves": 4},
+        "Weston McKennie": {"assists": 1, "yellow_cards": 1},
+        "Timothy Weah": {"shots": 2, "key_passes": 1},
+        "Edson Álvarez": {"recoveries": 7, "tackles": 3},
+        "Hirving Lozano": {"shots_on_target": 1, "yellow_cards": 1},
+    }
+}
+
+def clamp(val, minimum, maximum):
+    return max(minimum, min(val, maximum))
+
+def progress_live_match_simulation():
+    global SIMULATION_STATE
+    now = time.time()
+    
+    if not SIMULATION_STATE["initialized"]:
+        SIMULATION_STATE["initialized"] = True
+        SIMULATION_STATE["last_update_time"] = now
+        return
+        
+    elapsed = now - SIMULATION_STATE["last_update_time"]
+    # 15 seconds of real time = 1 minute of match time
+    minutes_to_add = int(elapsed / 15)
+    
+    if minutes_to_add > 0:
+        SIMULATION_STATE["last_update_time"] += minutes_to_add * 15
+        
+        for _ in range(minutes_to_add):
+            if SIMULATION_STATE["elapsed_minutes"] >= 95:
+                # Reset simulation loop
+                SIMULATION_STATE["elapsed_minutes"] = 70
+                SIMULATION_STATE["home_score"] = 2
+                SIMULATION_STATE["away_score"] = 1
+                SIMULATION_STATE["events"] = [
+                    {"time": "14'", "type": "goal", "player": "Christian Pulisic (USA)", "team": "home", "detail": "Assist by Weston McKennie"},
+                    {"time": "38'", "type": "goal", "player": "Santiago Giménez (MEX)", "team": "away", "detail": "Header from a corner kick"},
+                    {"time": "65'", "type": "goal", "player": "Folarin Balogun (USA)", "team": "home", "detail": "Low shot into the bottom corner"},
+                    {"time": "68'", "type": "yellow", "player": "Weston McKennie (USA)", "team": "home", "detail": "Tactical foul"}
+                ]
+                SIMULATION_STATE["stats"] = {
+                    "possession": {"home": 54, "away": 46},
+                    "shots": {"home": 14, "away": 10},
+                    "shotsOnTarget": {"home": 6, "away": 4},
+                    "corners": {"home": 6, "away": 4},
+                    "fouls": {"home": 11, "away": 13},
+                    "saves": {"home": 3, "away": 4},
+                    "offside": {"home": 2, "away": 1},
+                    "yellowCards": {"home": 1, "away": 2},
+                    "redCards": {"home": 0, "away": 0},
+                }
+                SIMULATION_STATE["player_stats"] = {
+                    "Christian Pulisic": {"goals": 1, "shots": 4, "key_passes": 2},
+                    "Folarin Balogun": {"goals": 1, "shots": 2, "key_passes": 0},
+                    "Santiago Giménez": {"goals": 1, "shots": 3, "key_passes": 0},
+                    "Matt Turner": {"saves": 3},
+                    "Guillermo Ochoa": {"saves": 4},
+                    "Weston McKennie": {"assists": 1, "yellow_cards": 1},
+                    "Timothy Weah": {"shots": 2, "key_passes": 1},
+                    "Edson Álvarez": {"recoveries": 7, "tackles": 3},
+                    "Hirving Lozano": {"shots_on_target": 1, "yellow_cards": 1},
+                }
+                break
+                
+            SIMULATION_STATE["elapsed_minutes"] += 1
+            minute = SIMULATION_STATE["elapsed_minutes"]
+            
+            # Fluctuate possession slightly
+            poss_change = random.randint(-2, 2)
+            SIMULATION_STATE["stats"]["possession"]["home"] = clamp(SIMULATION_STATE["stats"]["possession"]["home"] + poss_change, 35, 65)
+            SIMULATION_STATE["stats"]["possession"]["away"] = 100 - SIMULATION_STATE["stats"]["possession"]["home"]
+            
+            # 30% chance of a minor event
+            r = random.random()
+            if r < 0.30:
+                event_type = random.choice(["foul", "corner", "offside", "shot"])
+                is_home = random.random() < 0.55
+                team_side = "home" if is_home else "away"
+                opp_side = "away" if is_home else "home"
+                
+                if event_type == "foul":
+                    SIMULATION_STATE["stats"]["fouls"][team_side] += 1
+                elif event_type == "corner":
+                    SIMULATION_STATE["stats"]["corners"][team_side] += 1
+                elif event_type == "offside":
+                    SIMULATION_STATE["stats"]["offside"][team_side] += 1
+                elif event_type == "shot":
+                    SIMULATION_STATE["stats"]["shots"][team_side] += 1
+                    if random.random() < 0.40:
+                        SIMULATION_STATE["stats"]["shotsOnTarget"][team_side] += 1
+                        SIMULATION_STATE["stats"]["saves"][opp_side] += 1
+                        gk_name = "Matt Turner" if opp_side == "home" else "Guillermo Ochoa"
+                        if gk_name in SIMULATION_STATE["player_stats"]:
+                            SIMULATION_STATE["player_stats"][gk_name]["saves"] = SIMULATION_STATE["player_stats"].get(gk_name, {}).get("saves", 0) + 1
+                        
+                        shooter = random.choice(["Christian Pulisic", "Folarin Balogun", "Timothy Weah"]) if is_home else random.choice(["Santiago Giménez", "Hirving Lozano", "Uriel Antuna"])
+                        if shooter not in SIMULATION_STATE["player_stats"]:
+                            SIMULATION_STATE["player_stats"][shooter] = {"goals": 0, "shots": 0, "key_passes": 0}
+                        SIMULATION_STATE["player_stats"][shooter]["shots"] = SIMULATION_STATE["player_stats"][shooter].get("shots", 0) + 1
+            
+            # 6% chance of a yellow card
+            elif r < 0.36:
+                is_home = random.random() < 0.50
+                team_side = "home" if is_home else "away"
+                SIMULATION_STATE["stats"]["yellowCards"][team_side] += 1
+                card_player = random.choice(["Tyler Adams", "Sergiño Dest", "Yunus Musah"]) if is_home else random.choice(["Jorge Sánchez", "Edson Álvarez", "Johan Vásquez"])
+                SIMULATION_STATE["events"].append({
+                    "time": f"{minute}'",
+                    "type": "yellow",
+                    "player": f"{card_player} ({'USA' if is_home else 'MEX'})",
+                    "team": team_side,
+                    "detail": "Foul stopping a counter-attack"
+                })
+                if card_player not in SIMULATION_STATE["player_stats"]:
+                    SIMULATION_STATE["player_stats"][card_player] = {}
+                SIMULATION_STATE["player_stats"][card_player]["yellow_cards"] = SIMULATION_STATE["player_stats"][card_player].get("yellow_cards", 0) + 1
+
+            # 4% chance of a goal
+            elif r < 0.40:
+                is_home = random.random() < 0.60
+                team_side = "home" if is_home else "away"
+                team_short = "USA" if is_home else "MEX"
+                
+                if is_home:
+                    SIMULATION_STATE["home_score"] += 1
+                else:
+                    SIMULATION_STATE["away_score"] += 1
+                    
+                scorer = random.choice(["Christian Pulisic", "Folarin Balogun", "Weston McKennie"]) if is_home else random.choice(["Santiago Giménez", "Hirving Lozano", "Luis Chávez"])
+                assist_player = random.choice(["Timothy Weah", "Yunus Musah", "Sergiño Dest"]) if is_home else random.choice(["Orbelín Pineda", "Uriel Antuna", "Edson Álvarez"])
+                
+                if scorer not in SIMULATION_STATE["player_stats"]:
+                    SIMULATION_STATE["player_stats"][scorer] = {"goals": 0, "shots": 0}
+                SIMULATION_STATE["player_stats"][scorer]["goals"] = SIMULATION_STATE["player_stats"][scorer].get("goals", 0) + 1
+                SIMULATION_STATE["player_stats"][scorer]["shots"] = SIMULATION_STATE["player_stats"][scorer].get("shots", 0) + 1
+                
+                if assist_player not in SIMULATION_STATE["player_stats"]:
+                    SIMULATION_STATE["player_stats"][assist_player] = {"assists": 0}
+                SIMULATION_STATE["player_stats"][assist_player]["assists"] = SIMULATION_STATE["player_stats"][assist_player].get("assists", 0) + 1
+                
+                SIMULATION_STATE["events"].append({
+                    "time": f"{minute}'",
+                    "type": "goal",
+                    "player": f"{scorer} ({team_short})",
+                    "team": team_side,
+                    "detail": f"Goal scored! Assisted by {assist_player}."
+                })
+                
+        # Update mock match score and status
+        MOCK_WORLD_CUP_MATCHES[0]["home"]["score"] = SIMULATION_STATE["home_score"]
+        MOCK_WORLD_CUP_MATCHES[0]["away"]["score"] = SIMULATION_STATE["away_score"]
+        MOCK_WORLD_CUP_MATCHES[0]["status"]["reason"]["short"] = f"2H {SIMULATION_STATE['elapsed_minutes']}'"
+        MOCK_WORLD_CUP_MATCHES[0]["status"]["reason"]["long"] = f"Second Half ({SIMULATION_STATE['elapsed_minutes']}')"
+
+def get_updated_player_stats(player_name, role, default_stats):
+    if player_name not in SIMULATION_STATE["player_stats"]:
+        return default_stats
+    
+    p_sim = SIMULATION_STATE["player_stats"][player_name]
+    
+    if role == "GK":
+        saves = p_sim.get("saves", 3)
+        return f"Saves: {saves}, Clean Sheets: 0"
+        
+    parts = []
+    if "goals" in p_sim or "goals" in default_stats:
+        goals = p_sim.get("goals", 0)
+        parts.append(f"Goals: {goals}")
+    if "assists" in p_sim:
+        assists = p_sim.get("assists", 0)
+        parts.append(f"Assists: {assists}")
+    if "shots" in p_sim or "shots" in default_stats:
+        shots = p_sim.get("shots", 4 if player_name == "Christian Pulisic" else (3 if player_name == "Santiago Giménez" else 2))
+        parts.append(f"Shots: {shots}")
+    if "yellow_cards" in p_sim:
+        yc = p_sim.get("yellow_cards", 0)
+        parts.append(f"Yellow Cards: {yc}")
+    if "key_passes" in p_sim:
+        kp = p_sim.get("key_passes", 0)
+        parts.append(f"Key Passes: {kp}")
+        
+    if not parts:
+        return default_stats
+        
+    suffix = ", Captain" if "Captain" in default_stats else ""
+    return ", ".join(parts) + suffix
+
 @router.get("/players/search")
 def search_football_players(search: str = "m"):
     url = f"https://{RAPIDAPI_HOST}/football-players-search"
@@ -389,82 +612,38 @@ def search_football_players(search: str = "m"):
 
 @router.get("/matches/live")
 def get_live_football_matches():
-    # Fallback to Live FIFA World Cup match if API fails or rate limited
+    progress_live_match_simulation()
     return {"status": "success", "matches": [MOCK_WORLD_CUP_MATCHES[0]]}
 
 @router.get("/leagues/popular")
 def get_popular_leagues():
-    url = f"https://{RAPIDAPI_HOST}/football-popular-leagues"
-    headers = {
-        "x-rapidapi-host": RAPIDAPI_HOST,
-        "x-rapidapi-key": RAPIDAPI_KEY
+    # Return mock world cup tournament as popular league
+    return {
+        "status": "success",
+        "leagues": [
+            {"id": "wc2026", "name": "FIFA World Cup 2026", "logo": "https://images.fotmob.com/image_resources/logo/leaguelogo/42.png"}
+        ]
     }
-    
-    try:
-        response = requests.get(url, headers=headers, timeout=5)
-        return response.json()
-    except Exception as e:
-        return {"status": "error", "message": f"Request failed: {e}", "leagues": []}
 
 @router.get("/matches/by-date")
 def get_matches_by_date(date: str):
-    url = f"https://{RAPIDAPI_HOST}/football-get-matches-by-date"
-    querystring = {"date": date}
-    headers = {
-        "x-rapidapi-host": RAPIDAPI_HOST,
-        "x-rapidapi-key": RAPIDAPI_KEY
-    }
-    
-    try:
-        response = requests.get(url, headers=headers, params=querystring, timeout=5)
-        return response.json()
-    except Exception as e:
-        return {"status": "error", "message": f"Request failed: {e}", "matches": []}
+    progress_live_match_simulation()
+    return {"status": "success", "matches": MOCK_WORLD_CUP_MATCHES}
 
 @router.get("/matches/by-league")
 def get_matches_by_league(leagueid: str):
-    # UCL fallback or World Cup fallback if rate limit hit
-    url = f"https://{RAPIDAPI_HOST}/football-get-all-matches-by-league"
-    querystring = {"leagueid": leagueid}
-    headers = {
-        "x-rapidapi-host": RAPIDAPI_HOST,
-        "x-rapidapi-key": RAPIDAPI_KEY
-    }
-    
-    try:
-        response = requests.get(url, headers=headers, params=querystring, timeout=5)
-        if response.status_code == 200:
-            data = response.json()
-            if data.get("status") == "success" and data.get("response", {}).get("matches"):
-                return data
-    except Exception:
-        pass
-        
+    progress_live_match_simulation()
     return {"status": "success", "matches": MOCK_WORLD_CUP_MATCHES, "response": {"matches": MOCK_WORLD_CUP_MATCHES}}
 
 @router.get("/matches/live-and-upcoming")
 def get_live_and_upcoming_football_matches():
-    # Calls UCL endpoint as primary, but falls back to FIFA World Cup 2026 matches
-    url = f"https://{RAPIDAPI_HOST}/football-get-all-matches-by-league"
-    querystring = {"leagueid": "42"}
-    headers = {
-        "x-rapidapi-host": RAPIDAPI_HOST,
-        "x-rapidapi-key": RAPIDAPI_KEY
-    }
-    
-    try:
-        response = requests.get(url, headers=headers, params=querystring, timeout=5)
-        if response.status_code == 200:
-            data = response.json()
-            if data.get("status") == "success" and data.get("response", {}).get("matches"):
-                return {"status": "success", "matches": data["response"]["matches"]}
-    except Exception:
-        pass
-        
+    progress_live_match_simulation()
     return {"status": "success", "matches": MOCK_WORLD_CUP_MATCHES}
 
 @router.get("/match/{match_id}/scorecard")
 def get_football_scorecard(match_id: int):
+    progress_live_match_simulation()
+    
     # Mapping for teams details
     mapping = {
         77001: ("USA", "Mexico"),
@@ -485,38 +664,58 @@ def get_football_scorecard(match_id: int):
     live_state = None
     if match_id == 77001:
         live_state = {
-            "possession": {"home": 54, "away": 46},
-            "shots": {"home": 14, "away": 10},
-            "shotsOnTarget": {"home": 6, "away": 4},
-            "corners": {"home": 6, "away": 4},
-            "fouls": {"home": 11, "away": 13},
-            "saves": {"home": 3, "away": 4},
-            "offside": {"home": 2, "away": 1},
-            "yellowCards": {"home": 1, "away": 2},
-            "redCards": {"home": 0, "away": 0},
-            "events": [
-                {"time": "14'", "type": "goal", "player": "Christian Pulisic (USA)", "team": "home", "detail": "Assist by Weston McKennie"},
-                {"time": "38'", "type": "goal", "player": "Santiago Giménez (MEX)", "team": "away", "detail": "Header from a corner kick"},
-                {"time": "65'", "type": "goal", "player": "Folarin Balogun (USA)", "team": "home", "detail": "Low shot into the bottom corner"},
-                {"time": "68'", "type": "yellow", "player": "Weston McKennie (USA)", "team": "home", "detail": "Tactical foul"}
-            ]
+            "possession": SIMULATION_STATE["stats"]["possession"],
+            "shots": SIMULATION_STATE["stats"]["shots"],
+            "shotsOnTarget": SIMULATION_STATE["stats"]["shotsOnTarget"],
+            "corners": SIMULATION_STATE["stats"]["corners"],
+            "fouls": SIMULATION_STATE["stats"]["fouls"],
+            "saves": SIMULATION_STATE["stats"]["saves"],
+            "offside": SIMULATION_STATE["stats"]["offside"],
+            "yellowCards": SIMULATION_STATE["stats"]["yellowCards"],
+            "redCards": SIMULATION_STATE["stats"]["redCards"],
+            "events": SIMULATION_STATE["events"]
         }
         
+    t1_playing_updated = []
+    for p in t1_roster.get("playingXI", []):
+        p_copy = dict(p)
+        p_copy["stats"] = get_updated_player_stats(p["name"], p["role"], p.get("stats", ""))
+        t1_playing_updated.append(p_copy)
+        
+    t1_bench_updated = []
+    for p in t1_roster.get("bench", []):
+        p_copy = dict(p)
+        p_copy["stats"] = get_updated_player_stats(p["name"], p["role"], p.get("stats", ""))
+        t1_bench_updated.append(p_copy)
+
+    t2_playing_updated = []
+    for p in t2_roster.get("playingXI", []):
+        p_copy = dict(p)
+        p_copy["stats"] = get_updated_player_stats(p["name"], p["role"], p.get("stats", ""))
+        t2_playing_updated.append(p_copy)
+        
+    t2_bench_updated = []
+    for p in t2_roster.get("bench", []):
+        p_copy = dict(p)
+        p_copy["stats"] = get_updated_player_stats(p["name"], p["role"], p.get("stats", ""))
+        t2_bench_updated.append(p_copy)
+
     return {
         "status": "success",
         "liveState": live_state,
         "teams": {
             t1_name: {
-                "short": t1_roster["short"],
-                "players": t1_roster["playingXI"] + t1_roster["bench"],
-                "playingXI": t1_roster["playingXI"],
-                "bench": t1_roster["bench"]
+                "short": t1_roster.get("short", t1_name[:3].upper()),
+                "players": t1_playing_updated + t1_bench_updated,
+                "playingXI": t1_playing_updated,
+                "bench": t1_bench_updated
             },
             t2_name: {
-                "short": t2_roster["short"],
-                "players": t2_roster["playingXI"] + t2_roster["bench"],
-                "playingXI": t2_roster["playingXI"],
-                "bench": t2_roster["bench"]
+                "short": t2_roster.get("short", t2_name[:3].upper()),
+                "players": t2_playing_updated + t2_bench_updated,
+                "playingXI": t2_playing_updated,
+                "bench": t2_bench_updated
             }
         }
     }
+
