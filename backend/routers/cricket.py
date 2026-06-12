@@ -29,216 +29,160 @@ def _extract_matches(data: dict) -> list:
     return matches
 
 
-MOCK_IPL_MATCHES = [
+MOCK_TEST_MATCHES = [
     {
-        "_matchType": "T20",
-        "_seriesName": "Indian Premier League 2026",
+        "_matchType": "TEST",
+        "_seriesName": "Border-Gavaskar Trophy 2026/27 (Test Series)",
         "matchInfo": {
-            "matchId": 99001,
-            "seriesId": 999,
-            "seriesName": "Indian Premier League 2026",
-            "matchDesc": "Final",
-            "matchFormat": "T20",
-            "startDate": 1779976800000,
-            "endDate": 1779989400000,
+            "matchId": 99101,
+            "seriesId": 991,
+            "seriesName": "Border-Gavaskar Trophy 2026/27 (Test Series)",
+            "matchDesc": "1st Test",
+            "matchFormat": "TEST",
+            "startDate": 1780236000000,
+            "endDate": 1780668000000,
             "state": "Live",
-            "status": "CSK need 12 runs off 6 balls",
+            "status": "Day 3: India lead by 142 runs",
             "team1": {
-                "teamId": 1,
-                "teamName": "Chennai Super Kings",
-                "teamSName": "CSK",
-                "imageId": 1001
+                "teamId": 101,
+                "teamName": "India",
+                "teamSName": "IND",
+                "imageId": 2
             },
             "team2": {
-                "teamId": 2,
-                "teamName": "Mumbai Indians",
-                "teamSName": "MI",
-                "imageId": 1002
+                "teamId": 102,
+                "teamName": "Australia",
+                "teamSName": "AUS",
+                "imageId": 4
             },
             "venueInfo": {
-                "ground": "Wankhede Stadium",
-                "city": "Mumbai"
+                "ground": "Melbourne Cricket Ground",
+                "city": "Melbourne"
             }
         },
         "liveState": {
-            "inningsNo": 2,
-            "battingTeamId": 1,
-            "bowlingTeamId": 2,
-            "target": 183,
-            "runsNeeded": 12,
-            "ballsRemaining": 6,
-            "requiredRunRate": 12.0,
-            "currentRunRate": 9.0,
+            "inningsNo": 3,
+            "battingTeamId": 101,
+            "bowlingTeamId": 102,
+            "target": 0,
+            "runsNeeded": 0,
+            "ballsRemaining": 0,
+            "requiredRunRate": 0.0,
+            "currentRunRate": 3.1,
             "activeBatsmen": [
                 {
-                    "name": "MS Dhoni",
-                    "playerId": 1001,
-                    "runs": 28,
-                    "ballsFaced": 12,
-                    "fours": 1,
-                    "sixes": 3,
+                    "name": "Virat Kohli",
+                    "playerId": 2001,
+                    "runs": 78,
+                    "ballsFaced": 142,
+                    "fours": 9,
+                    "sixes": 0,
                     "isStriker": True
                 },
                 {
-                    "name": "Ravindra Jadeja",
-                    "playerId": 1003,
-                    "runs": 15,
-                    "ballsFaced": 10,
-                    "fours": 0,
-                    "sixes": 1,
+                    "name": "Rishabh Pant",
+                    "playerId": 2002,
+                    "runs": 45,
+                    "ballsFaced": 58,
+                    "fours": 5,
+                    "sixes": 2,
                     "isStriker": False
                 }
             ],
             "activeBowler": {
-                "name": "Jasprit Bumrah",
-                "playerId": 1014,
-                "overs": 3.0,
-                "maidens": 0,
-                "runsConceded": 22,
+                "name": "Pat Cummins",
+                "playerId": 2101,
+                "overs": 18.4,
+                "maidens": 3,
+                "runsConceded": 54,
                 "wickets": 2,
-                "currentOverStats": [".", "6", "W", "1", "4", "1"]
+                "currentOverStats": [".", "1", ".", "W", ".", "."]
             }
         },
         "matchScore": {
             "team1Score": {
                 "inngs1": {
                     "inningsId": 1,
-                    "runs": 171,
+                    "runs": 325,
+                    "wickets": 10,
+                    "overs": 94.2
+                },
+                "inngs2": {
+                    "inningsId": 3,
+                    "runs": 180,
                     "wickets": 4,
-                    "overs": 19.0
+                    "overs": 58.0
                 }
             },
             "team2Score": {
                 "inngs1": {
                     "inningsId": 2,
-                    "runs": 182,
-                    "wickets": 6,
-                    "overs": 20.0
+                    "runs": 363,
+                    "wickets": 10,
+                    "overs": 102.4
                 }
             }
         }
     },
     {
-        "_matchType": "T20",
-        "_seriesName": "Indian Premier League 2026",
+        "_matchType": "TEST",
+        "_seriesName": "England vs India Test Series 2026",
         "matchInfo": {
-            "matchId": 99002,
-            "seriesId": 999,
-            "seriesName": "Indian Premier League 2026",
-            "matchDesc": "Qualifier 2",
-            "matchFormat": "T20",
-            "startDate": 1780063200000,
-            "endDate": 1780075800000,
+            "matchId": 99102,
+            "seriesId": 992,
+            "seriesName": "England vs India Test Series 2026",
+            "matchDesc": "2nd Test",
+            "matchFormat": "TEST",
+            "startDate": 1780838400000,
+            "endDate": 1781270400000,
             "state": "Preview",
             "status": "Upcoming Match",
             "team1": {
-                "teamId": 3,
-                "teamName": "Royal Challengers Bengaluru",
-                "teamSName": "RCB",
-                "imageId": 1003
+                "teamId": 103,
+                "teamName": "England",
+                "teamSName": "ENG",
+                "imageId": 9
             },
             "team2": {
-                "teamId": 4,
-                "teamName": "Kolkata Knight Riders",
-                "teamSName": "KKR",
-                "imageId": 1004
+                "teamId": 101,
+                "teamName": "India",
+                "teamSName": "IND",
+                "imageId": 2
             },
             "venueInfo": {
-                "ground": "M. Chinnaswamy Stadium",
-                "city": "Bengaluru"
+                "ground": "Lord's",
+                "city": "London"
             }
         }
     },
     {
-        "_matchType": "T20",
-        "_seriesName": "Indian Premier League 2026",
+        "_matchType": "TEST",
+        "_seriesName": "New Zealand vs South Africa Test Series 2026",
         "matchInfo": {
-            "matchId": 99003,
-            "seriesId": 999,
-            "seriesName": "Indian Premier League 2026",
-            "matchDesc": "Eliminator",
-            "matchFormat": "T20",
-            "startDate": 1780149600000,
-            "endDate": 1780162200000,
+            "matchId": 99103,
+            "seriesId": 993,
+            "seriesName": "New Zealand vs South Africa Test Series 2026",
+            "matchDesc": "1st Test",
+            "matchFormat": "TEST",
+            "startDate": 1781443200000,
+            "endDate": 1781875200000,
             "state": "Preview",
             "status": "Upcoming Match",
             "team1": {
-                "teamId": 5,
-                "teamName": "Sunrisers Hyderabad",
-                "teamSName": "SRH",
-                "imageId": 1005
+                "teamId": 104,
+                "teamName": "New Zealand",
+                "teamSName": "NZ",
+                "imageId": 13
             },
             "team2": {
-                "teamId": 6,
-                "teamName": "Rajasthan Royals",
-                "teamSName": "RR",
-                "imageId": 1006
+                "teamId": 105,
+                "teamName": "South Africa",
+                "teamSName": "SA",
+                "imageId": 11
             },
             "venueInfo": {
-                "ground": "Narendra Modi Stadium",
-                "city": "Ahmedabad"
-            }
-        }
-    },
-    {
-        "_matchType": "T20",
-        "_seriesName": "Indian Premier League 2026",
-        "matchInfo": {
-            "matchId": 99004,
-            "seriesId": 999,
-            "seriesName": "Indian Premier League 2026",
-            "matchDesc": "Group Stage",
-            "matchFormat": "T20",
-            "startDate": 1780236000000,
-            "endDate": 1780248600000,
-            "state": "Preview",
-            "status": "Upcoming Match",
-            "team1": {
-                "teamId": 7,
-                "teamName": "Gujarat Titans",
-                "teamSName": "GT",
-                "imageId": 1007
-            },
-            "team2": {
-                "teamId": 8,
-                "teamName": "Lucknow Super Giants",
-                "teamSName": "LSG",
-                "imageId": 1008
-            },
-            "venueInfo": {
-                "ground": "Arun Jaitley Stadium",
-                "city": "Delhi"
-            }
-        }
-    },
-    {
-        "_matchType": "T20",
-        "_seriesName": "Indian Premier League 2026",
-        "matchInfo": {
-            "matchId": 99005,
-            "seriesId": 999,
-            "seriesName": "Indian Premier League 2026",
-            "matchDesc": "Group Stage",
-            "matchFormat": "T20",
-            "startDate": 1780322400000,
-            "endDate": 1780335000000,
-            "state": "Preview",
-            "status": "Upcoming Match",
-            "team1": {
-                "teamId": 9,
-                "teamName": "Delhi Capitals",
-                "teamSName": "DC",
-                "imageId": 1009
-            },
-            "team2": {
-                "teamId": 10,
-                "teamName": "Punjab Kings",
-                "teamSName": "PBKS",
-                "imageId": 1010
-            },
-            "venueInfo": {
-                "ground": "HPCA Stadium",
-                "city": "Dharamshala"
+                "ground": "Basin Reserve",
+                "city": "Wellington"
             }
         }
     }
@@ -271,17 +215,10 @@ def is_ipl(match: dict) -> bool:
 
 
 def is_allowed_match(match: dict) -> bool:
-    """Check if the match is an IPL match or an international match."""
-    # 1. Keep IPL matches
-    if is_ipl(match):
-        return True
-    
-    # 2. Keep international matches (which includes international ODI, Test, and T20Is)
-    match_type = (match.get("_matchType") or "").lower()
-    if "international" in match_type:
-        return True
-        
-    return False
+    """Check if the match is a Test match."""
+    match_format = (match.get("matchInfo", {}).get("matchFormat") or "").lower()
+    return match_format == "test"
+
 
 
 def get_mock_scorecard(match_id: int) -> dict:
@@ -631,16 +568,16 @@ def get_live_and_upcoming_cricket_matches():
     # Keep IPL and international/ODI/TEST matches
     filtered_matches = [m for m in all_matches if is_allowed_match(m)]
     
-    # Fallback to mock IPL matches if none found
+    # Fallback to mock TEST matches if none found
     if not filtered_matches:
-        filtered_matches = MOCK_IPL_MATCHES
+        filtered_matches = MOCK_TEST_MATCHES
 
     return {"status": "success", "matches": filtered_matches}
 
 
 @router.get("/matches/live")
 def get_live_cricket_matches():
-    """Legacy live-only endpoint. ONLY returns IPL matches."""
+    """Legacy live-only endpoint. ONLY returns TEST matches."""
     try:
         response = requests.get(
             "https://cricbuzz-cricket2.p.rapidapi.com/matches/v1/live",
@@ -655,17 +592,17 @@ def get_live_cricket_matches():
         filtered_matches = [m for m in matches if is_allowed_match(m)]
         if not filtered_matches:
             # return only the mock live match
-            filtered_matches = [m for m in MOCK_IPL_MATCHES if m["matchInfo"]["state"].lower() == "live"]
+            filtered_matches = [m for m in MOCK_TEST_MATCHES if m["matchInfo"]["state"].lower() == "live"]
         return {"status": "success", "matches": filtered_matches}
     except Exception as e:
         # Fallback to mock live if exception
-        filtered_matches = [m for m in MOCK_IPL_MATCHES if m["matchInfo"]["state"].lower() == "live"]
+        filtered_matches = [m for m in MOCK_TEST_MATCHES if m["matchInfo"]["state"].lower() == "live"]
         return {"status": "success", "matches": filtered_matches}
 
 
 @router.get("/matches/upcoming")
 def get_upcoming_cricket_matches():
-    """Legacy upcoming-only endpoint. ONLY returns IPL matches."""
+    """Legacy upcoming-only endpoint. ONLY returns TEST matches."""
     try:
         response = requests.get(
             "https://cricbuzz-cricket2.p.rapidapi.com/matches/v1/upcoming",
@@ -680,11 +617,11 @@ def get_upcoming_cricket_matches():
         filtered_matches = [m for m in matches if is_allowed_match(m)]
         if not filtered_matches:
             # return only the mock preview matches
-            filtered_matches = [m for m in MOCK_IPL_MATCHES if m["matchInfo"]["state"].lower() == "preview"]
+            filtered_matches = [m for m in MOCK_TEST_MATCHES if m["matchInfo"]["state"].lower() == "preview"]
         return {"status": "success", "matches": filtered_matches}
     except Exception as e:
         # Fallback to mock preview if exception
-        filtered_matches = [m for m in MOCK_IPL_MATCHES if m["matchInfo"]["state"].lower() == "preview"]
+        filtered_matches = [m for m in MOCK_TEST_MATCHES if m["matchInfo"]["state"].lower() == "preview"]
         return {"status": "success", "matches": filtered_matches}
 
 

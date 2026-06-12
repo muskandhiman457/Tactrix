@@ -18,6 +18,7 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   List<dynamic> _matches = [];
   bool _isLoadingMatches = true;
   Map<String, dynamic>? _selectedMatch;
+  String _selectedSport = 'cricket'; // 'cricket', 'kabaddi', 'football'
   
   // H2H Selections
   String? _selectedPlayerA;
@@ -39,16 +40,78 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   }
 
   Future<void> _fetchMatches() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoadingMatches = true;
+      _matches = [];
+      _selectedMatch = null;
+      _winPrediction = null;
+      _teamAPlayers = [];
+      _teamBPlayers = [];
+      _selectedPlayerA = null;
+      _selectedPlayerB = null;
+    });
     try {
       final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/api/cricket/matches/live-and-upcoming'),
+        Uri.parse('${ApiConfig.baseUrl}/api/$_selectedSport/matches/live-and-upcoming'),
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['status'] == 'success' && data['matches'] is List) {
           if (!mounted) return;
+          List<dynamic> fetchedMatches = data['matches'];
+          if (_selectedSport == 'football') {
+            fetchedMatches = fetchedMatches.map((m) {
+              if (m is Map<String, dynamic> && !m.containsKey('matchInfo')) {
+                final isLive = m['status']?['started'] == true && m['status']?['finished'] == false;
+                final stateStr = isLive ? 'Live' : 'Upcoming';
+                final statusStr = m['status']?['reason']?['long'] ?? (m['notStarted'] == true ? 'Upcoming Match' : 'Live');
+                final homeName = m['home']?['name'] ?? 'Home Team';
+                final awayName = m['away']?['name'] ?? 'Away Team';
+                
+                String getSName(String name) {
+                  final n = name.toLowerCase().trim();
+                  if (n.contains('usa')) return 'USA';
+                  if (n.contains('mexico') || n.contains('mex')) return 'MEX';
+                  if (n.contains('argentina') || n.contains('arg')) return 'ARG';
+                  if (n.contains('france') || n.contains('fra')) return 'FRA';
+                  if (n.contains('portugal') || n.contains('por')) return 'POR';
+                  if (n.contains('spain') || n.contains('esp')) return 'ESP';
+                  if (n.contains('brazil') || n.contains('bra')) return 'BRA';
+                  if (n.contains('england') || n.contains('eng')) return 'ENG';
+                  if (n.contains('germany') || n.contains('ger')) return 'GER';
+                  if (n.contains('japan') || n.contains('jpn')) return 'JPN';
+                  return n.length >= 3 ? n.substring(0, 3).toUpperCase() : n.toUpperCase();
+                }
+
+                return {
+                  'matchInfo': {
+                    'matchId': m['id'],
+                    'seriesName': m['tournamentName'] ?? 'FIFA World Cup 2026',
+                    'matchDesc': 'Group Stage',
+                    'startDate': 0,
+                    'state': stateStr,
+                    'status': statusStr,
+                    'team1': {
+                      'teamName': homeName,
+                      'teamSName': getSName(homeName),
+                    },
+                    'team2': {
+                      'teamName': awayName,
+                      'teamSName': getSName(awayName),
+                    },
+                    'venueInfo': {
+                      'ground': m['venue'] ?? 'Stadium',
+                      'city': '',
+                    }
+                  }
+                };
+              }
+              return m;
+            }).toList();
+          }
           setState(() {
-            _matches = data['matches'];
+            _matches = fetchedMatches;
             _isLoadingMatches = false;
             if (_matches.isNotEmpty) {
               _selectMatch(_matches[0]);
@@ -142,10 +205,14 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
 
   Future<void> _fetchPlayersForMatch(dynamic matchId, String team1, String team2) async {
     _fetchWinPrediction(matchId);
-    final captains = {'MS Dhoni', 'Ruturaj Gaikwad', 'Rohit Sharma', 'Hardik Pandya', 'Virat Kohli', 'Faf du Plessis', 'Shreyas Iyer', 'Pat Cummins', 'Sanju Samson', 'Shubman Gill', 'Rishabh Pant', 'KL Rahul', 'Shikhar Dhawan', 'Sam Curran'};
+    final captains = {
+      'MS Dhoni', 'Ruturaj Gaikwad', 'Rohit Sharma', 'Hardik Pandya', 'Virat Kohli', 'Faf du Plessis', 'Shreyas Iyer', 'Pat Cummins', 'Sanju Samson', 'Shubman Gill', 'Rishabh Pant', 'KL Rahul', 'Shikhar Dhawan', 'Sam Curran',
+      'Lionel Messi', 'Kylian Mbappé', 'Kylian Mbappe', 'Cristiano Ronaldo', 'Christian Pulisic', 'Harry Kane', 'Luka Modric', 'Danilo', 'Wataru Endo', 'Ilkay Gündogan', 'Rodri',
+      'Sunil Kumar', 'Saurabh Nandal', 'Naveen Kumar', 'Aslam Inamdar'
+    };
     try {
       final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/api/cricket/match/$matchId/scorecard'),
+        Uri.parse('${ApiConfig.baseUrl}/api/$_selectedSport/match/$matchId/scorecard'),
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -334,6 +401,39 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     return null;
   }
 
+  String? getKabaddiLogoAsset(String teamName) {
+    final name = teamName.toLowerCase().trim();
+    if (name.contains("patna") || name.contains("pirates") || name == "pat") {
+      return "assets/logos/patna_pirates.png";
+    } else if (name.contains("mumba") || name == "mum") {
+      return "assets/logos/u_mumba.png";
+    } else if (name.contains("jaipur") || name.contains("panthers") || name == "jai") {
+      return "assets/logos/jaipur_pink_panthers.png";
+    } else if (name.contains("bengaluru") || name.contains("bulls") || name == "blr") {
+      return "assets/logos/bengaluru_bulls.png";
+    } else if (name.contains("delhi") || name.contains("dabang") || name == "del") {
+      return "assets/logos/dabang_delhi.png";
+    } else if (name.contains("puneri") || name.contains("paltan") || name == "pun") {
+      return "assets/logos/puneri_paltan.png";
+    }
+    return null;
+  }
+
+  String? getFootballFlagLogoUrl(String teamName) {
+    final name = teamName.toLowerCase().trim();
+    if (name.contains('usa') || name.contains('united states')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/6095.png';
+    if (name.contains('mexico') || name.contains('mex')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/6088.png';
+    if (name.contains('argentina') || name.contains('arg')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/6320.png';
+    if (name.contains('france') || name.contains('fra')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/8244.png';
+    if (name.contains('portugal') || name.contains('por')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/9907.png';
+    if (name.contains('spain') || name.contains('esp')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/9906.png';
+    if (name.contains('brazil') || name.contains('bra')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/6321.png';
+    if (name.contains('england') || name.contains('eng')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/8498.png';
+    if (name.contains('germany') || name.contains('ger')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/8148.png';
+    if (name.contains('japan') || name.contains('jpn')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/6175.png';
+    return null;
+  }
+
   List<Map<String, String>> _getPlayersForTeam(String teamName) {
     final cleaned = teamName.toLowerCase();
     if (cleaned.contains('chennai') || cleaned.contains('csk')) {
@@ -486,6 +586,172 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         {'name': 'Harshal Patel', 'role': 'Bowler'},
       ];
     }
+    final cleanedName = teamName.toLowerCase();
+    if (cleanedName == 'usa' || cleanedName.contains('united states')) {
+      return [
+        {'name': 'Christian Pulisic', 'role': 'FW'},
+        {'name': 'Folarin Balogun', 'role': 'FW'},
+        {'name': 'Timothy Weah', 'role': 'FW'},
+        {'name': 'Weston McKennie', 'role': 'MF'},
+        {'name': 'Tyler Adams', 'role': 'MF'},
+        {'name': 'Yunus Musah', 'role': 'MF'},
+        {'name': 'Antonee Robinson', 'role': 'DF'},
+        {'name': 'Chris Richards', 'role': 'DF'},
+        {'name': 'Tim Ream', 'role': 'DF'},
+        {'name': 'Sergiño Dest', 'role': 'DF'},
+        {'name': 'Matt Turner', 'role': 'GK'},
+      ];
+    }
+    if (cleanedName == 'mexico' || cleanedName == 'mex') {
+      return [
+        {'name': 'Santiago Giménez', 'role': 'FW'},
+        {'name': 'Hirving Lozano', 'role': 'FW'},
+        {'name': 'Uriel Antuna', 'role': 'FW'},
+        {'name': 'Edson Álvarez', 'role': 'MF'},
+        {'name': 'Luis Chávez', 'role': 'MF'},
+        {'name': 'Orbelín Pineda', 'role': 'MF'},
+        {'name': 'Jesús Gallardo', 'role': 'DF'},
+        {'name': 'César Montes', 'role': 'DF'},
+        {'name': 'Johan Vásquez', 'role': 'DF'},
+        {'name': 'Jorge Sánchez', 'role': 'DF'},
+        {'name': 'Guillermo Ochoa', 'role': 'GK'},
+      ];
+    }
+    if (cleanedName == 'argentina' || cleanedName == 'arg') {
+      return [
+        {'name': 'Lionel Messi', 'role': 'FW'},
+        {'name': 'Lautaro Martínez', 'role': 'FW'},
+        {'name': 'Julián Álvarez', 'role': 'FW'},
+        {'name': 'Rodrigo De Paul', 'role': 'MF'},
+        {'name': 'Enzo Fernández', 'role': 'MF'},
+        {'name': 'Alexis Mac Allister', 'role': 'MF'},
+        {'name': 'Nicolás Tagliafico', 'role': 'DF'},
+        {'name': 'Nicolás Otamendi', 'role': 'DF'},
+        {'name': 'Cristian Romero', 'role': 'DF'},
+        {'name': 'Nahuel Molina', 'role': 'DF'},
+        {'name': 'Emiliano Martínez', 'role': 'GK'},
+      ];
+    }
+    if (cleanedName == 'france' || cleanedName == 'fra') {
+      return [
+        {'name': 'Kylian Mbappé', 'role': 'FW'},
+        {'name': 'Antoine Griezmann', 'role': 'MF'},
+        {'name': 'Ousmane Dembélé', 'role': 'FW'},
+        {'name': 'Bradley Barcola', 'role': 'FW'},
+        {'name': 'Aurélien Tchouaméni', 'role': 'MF'},
+        {'name': 'N\'Golo Kanté', 'role': 'MF'},
+        {'name': 'Theo Hernández', 'role': 'DF'},
+        {'name': 'William Saliba', 'role': 'DF'},
+        {'name': 'Dayot Upamecano', 'role': 'DF'},
+        {'name': 'Jules Koundé', 'role': 'DF'},
+        {'name': 'Mike Maignan', 'role': 'GK'},
+      ];
+    }
+    if (cleanedName == 'portugal' || cleanedName == 'por') {
+      return [
+        {'name': 'Cristiano Ronaldo', 'role': 'FW'},
+        {'name': 'Rafael Leão', 'role': 'FW'},
+        {'name': 'Bernardo Silva', 'role': 'FW'},
+        {'name': 'Bruno Fernandes', 'role': 'MF'},
+        {'name': 'Vitinha', 'role': 'MF'},
+        {'name': 'João Palhinha', 'role': 'MF'},
+        {'name': 'João Cancelo', 'role': 'DF'},
+        {'name': 'Rúben Dias', 'role': 'DF'},
+        {'name': 'Pepe', 'role': 'DF'},
+        {'name': 'Diogo Dalot', 'role': 'DF'},
+        {'name': 'Diogo Costa', 'role': 'GK'},
+      ];
+    }
+    if (cleanedName == 'spain' || cleanedName == 'esp') {
+      return [
+        {'name': 'Álvaro Morata', 'role': 'FW'},
+        {'name': 'Lamine Yamal', 'role': 'FW'},
+        {'name': 'Nico Williams', 'role': 'FW'},
+        {'name': 'Pedri', 'role': 'MF'},
+        {'name': 'Rodri', 'role': 'MF'},
+        {'name': 'Fabián Ruiz', 'role': 'MF'},
+        {'name': 'Marc Cucurella', 'role': 'DF'},
+        {'name': 'Aymeric Laporte', 'role': 'DF'},
+        {'name': 'Robin Le Normand', 'role': 'DF'},
+        {'name': 'Dani Carvajal', 'role': 'DF'},
+        {'name': 'Unai Simón', 'role': 'GK'},
+      ];
+    }
+    if (cleanedName == 'germany' || cleanedName == 'ger') {
+      return [
+        {'name': 'Kai Havertz', 'role': 'FW'},
+        {'name': 'Florian Wirtz', 'role': 'FW'},
+        {'name': 'Jamal Musiala', 'role': 'FW'},
+        {'name': 'Ilkay Gündogan', 'role': 'MF'},
+        {'name': 'Toni Kroos', 'role': 'MF'},
+        {'name': 'Robert Andrich', 'role': 'MF'},
+        {'name': 'Maximilian Mittelstädt', 'role': 'DF'},
+        {'name': 'Jonathan Tah', 'role': 'DF'},
+        {'name': 'Antonio Rüdiger', 'role': 'DF'},
+        {'name': 'Joshua Kimmich', 'role': 'DF'},
+        {'name': 'Manuel Neuer', 'role': 'GK'},
+      ];
+    }
+    if (cleanedName == 'brazil' || cleanedName == 'bra') {
+      return [
+        {'name': 'Vinícius Júnior', 'role': 'FW'},
+        {'name': 'Rodrygo', 'role': 'FW'},
+        {'name': 'Raphinha', 'role': 'FW'},
+        {'name': 'Lucas Paquetá', 'role': 'MF'},
+        {'name': 'Bruno Guimarães', 'role': 'MF'},
+        {'name': 'João Gomes', 'role': 'MF'},
+        {'name': 'Danilo', 'role': 'DF'},
+        {'name': 'Marquinhos', 'role': 'DF'},
+        {'name': 'Gabriel Magalhães', 'role': 'DF'},
+        {'name': 'Wendell', 'role': 'DF'},
+        {'name': 'Alisson Becker', 'role': 'GK'},
+      ];
+    }
+    if (cleanedName == 'england' || cleanedName == 'eng') {
+      return [
+        {'name': 'Harry Kane', 'role': 'FW'},
+        {'name': 'Bukayo Saka', 'role': 'FW'},
+        {'name': 'Phil Foden', 'role': 'FW'},
+        {'name': 'Jude Bellingham', 'role': 'MF'},
+        {'name': 'Declan Rice', 'role': 'MF'},
+        {'name': 'Kobbie Mainoo', 'role': 'MF'},
+        {'name': 'Kieran Trippier', 'role': 'DF'},
+        {'name': 'Kyle Walker', 'role': 'DF'},
+        {'name': 'John Stones', 'role': 'DF'},
+        {'name': 'Marc Guéhi', 'role': 'DF'},
+        {'name': 'Jordan Pickford', 'role': 'GK'},
+      ];
+    }
+    if (cleanedName == 'japan' || cleanedName == 'jpn') {
+      return [
+        {'name': 'Ayase Ueda', 'role': 'FW'},
+        {'name': 'Kaoru Mitoma', 'role': 'FW'},
+        {'name': 'Takumi Minamino', 'role': 'FW'},
+        {'name': 'Takefusa Kubo', 'role': 'MF'},
+        {'name': 'Wataru Endo', 'role': 'MF'},
+        {'name': 'Hidemasa Morita', 'role': 'MF'},
+        {'name': 'Yukinari Sugawara', 'role': 'DF'},
+        {'name': 'Ko Itakura', 'role': 'DF'},
+        {'name': 'Koki Machida', 'role': 'DF'},
+        {'name': 'Hiroki Ito', 'role': 'DF'},
+        {'name': 'Zion Suzuki', 'role': 'GK'},
+      ];
+    }
+    if (_selectedSport == 'football') {
+      return [
+        {'name': '$teamName Player 1', 'role': 'FW'},
+        {'name': '$teamName Player 2', 'role': 'MF'},
+        {'name': '$teamName Player 3', 'role': 'DF'},
+        {'name': '$teamName Player 4', 'role': 'GK'},
+        {'name': '$teamName Player 5', 'role': 'FW'},
+        {'name': '$teamName Player 6', 'role': 'MF'},
+        {'name': '$teamName Player 7', 'role': 'DF'},
+        {'name': '$teamName Player 8', 'role': 'FW'},
+        {'name': '$teamName Player 9', 'role': 'MF'},
+        {'name': '$teamName Player 10', 'role': 'DF'},
+        {'name': '$teamName Player 11', 'role': 'GK'},
+      ];
+    }
     return [
       {'name': '$teamName Player 1', 'role': 'Batsman'},
       {'name': '$teamName Player 2', 'role': 'All-Rounder'},
@@ -514,23 +780,110 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   }
 
   Widget _buildTeamLogoAvatar(String teamName, double radius) {
-    final asset = getIplLogoAsset(teamName);
-    if (asset != null) {
+    final iplAsset = getIplLogoAsset(teamName);
+    final kabaddiAsset = getKabaddiLogoAsset(teamName);
+    final footballUrl = getFootballFlagLogoUrl(teamName);
+
+    if (iplAsset != null) {
       return CircleAvatar(
         radius: radius,
         backgroundColor: Colors.transparent,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(radius),
-          child: Image.asset(asset, fit: BoxFit.contain, width: radius * 2, height: radius * 2),
+          child: Image.asset(iplAsset, fit: BoxFit.contain, width: radius * 2, height: radius * 2),
         ),
       );
     }
+
+    if (kabaddiAsset != null) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: Colors.transparent,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(radius),
+          child: Image.asset(kabaddiAsset, fit: BoxFit.contain, width: radius * 2, height: radius * 2),
+        ),
+      );
+    }
+
+    if (footballUrl != null) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: Colors.transparent,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(radius),
+          child: Image.network(footballUrl, fit: BoxFit.contain, width: radius * 2, height: radius * 2),
+        ),
+      );
+    }
+
     return CircleAvatar(
       radius: radius,
       backgroundColor: Colors.grey[800],
       child: Text(
         teamName.isNotEmpty ? teamName[0].toUpperCase() : '?',
         style: GoogleFonts.outfit(color: Colors.white, fontSize: radius, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildSportSelector() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      height: 40,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          _buildSportPill('cricket', Icons.sports_cricket, 'CRICKET'),
+          const SizedBox(width: 10),
+          _buildSportPill('kabaddi', Icons.sports_kabaddi, 'KABADDI'),
+          const SizedBox(width: 10),
+          _buildSportPill('football', Icons.sports_soccer, 'FOOTBALL'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSportPill(String sport, IconData icon, String label) {
+    final isSelected = _selectedSport == sport;
+    return GestureDetector(
+      onTap: () {
+        if (_selectedSport != sport) {
+          setState(() {
+            _selectedSport = sport;
+          });
+          _fetchMatches();
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF00FF7F).withValues(alpha: 0.15) : const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF00FF7F) : Colors.grey[800]!,
+            width: isSelected ? 1.5 : 1.0,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? const Color(0xFF00FF7F) : Colors.grey,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: GoogleFonts.outfit(
+                color: isSelected ? const Color(0xFF00FF7F) : Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -552,41 +905,51 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
         ),
         centerTitle: true,
       ),
-      body: _isLoadingMatches
-          ? const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00FF7F)),
-              ),
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildMatchSelectionHub(),
-                  const SizedBox(height: 24),
-                  if (_selectedMatch != null) ...[
-                    _buildConditionalPerformanceTrend(),
-                    const SizedBox(height: 24),
-                    _buildAIWinPredictionCard(),
-                    const SizedBox(height: 24),
-                    _buildPlayerH2HProfileComponent(),
-                    const SizedBox(height: 24),
-                    _buildRadarChartCard(),
-                  ] else ...[
-                    SizedBox(
-                      height: 200,
-                      child: Center(
-                        child: Text(
-                          'no_live_upcoming_matches'.tr(),
-                          style: const TextStyle(color: Colors.grey),
-                        ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildSportSelector(),
+            Expanded(
+              child: _isLoadingMatches
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF00FF7F)),
                       ),
                     )
-                  ]
-                ],
-              ),
+                  : SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildMatchSelectionHub(),
+                          const SizedBox(height: 24),
+                          if (_selectedMatch != null) ...[
+                            _buildConditionalPerformanceTrend(),
+                            const SizedBox(height: 24),
+                            _buildAIWinPredictionCard(),
+                            const SizedBox(height: 24),
+                            _buildPlayerH2HProfileComponent(),
+                            const SizedBox(height: 24),
+                            _buildRadarChartCard(),
+                          ] else ...[
+                            SizedBox(
+                              height: 200,
+                              child: Center(
+                                child: Text(
+                                  'no_live_upcoming_matches'.tr(),
+                                  style: const TextStyle(color: Colors.grey),
+                                ),
+                              ),
+                            )
+                          ]
+                        ],
+                      ),
+                    ),
             ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -945,7 +1308,11 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  isLive ? 'over_by_over_live_index'.tr() : 'last_5_games_form_curve'.tr(),
+                  isLive
+                      ? (_selectedSport == 'football' || _selectedSport == 'kabaddi'
+                          ? 'Momentum Live Index'
+                          : 'over_by_over_live_index'.tr())
+                      : 'last_5_games_form_curve'.tr(),
                   style: GoogleFonts.inter(
                     color: isLive ? Colors.redAccent : const Color(0xFF00FF7F),
                     fontWeight: FontWeight.bold,
@@ -974,10 +1341,24 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       interval: 1,
-                      getTitlesWidget: (value, meta) => SideTitleWidget(
-                        meta: meta,
-                        child: Text(isLive ? 'Ov ${value.toInt() * 4}' : 'G${value.toInt() + 1}', style: const TextStyle(color: Colors.grey, fontSize: 9)),
-                      ),
+                      getTitlesWidget: (value, meta) {
+                        String text = '';
+                        if (isLive) {
+                          if (_selectedSport == 'football') {
+                            text = 'Min ${value.toInt() * 20}';
+                          } else if (_selectedSport == 'kabaddi') {
+                            text = 'Min ${value.toInt() * 10}';
+                          } else {
+                            text = 'Ov ${value.toInt() * 4}';
+                          }
+                        } else {
+                          text = 'G${value.toInt() + 1}';
+                        }
+                        return SideTitleWidget(
+                          meta: meta,
+                          child: Text(text, style: const TextStyle(color: Colors.grey, fontSize: 9)),
+                        );
+                      },
                     ),
                   ),
                   leftTitles: AxisTitles(
@@ -1589,7 +1970,11 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 ticksTextStyle: const TextStyle(color: Colors.transparent),
                 titlePositionPercentageOffset: 0.15,
                 getTitle: (index, angle) {
-                  final titles = ['Strike Rate', 'Average', 'Boundaries', 'Wickets', 'Economy', 'Form'];
+                  final titles = _selectedSport == 'football'
+                      ? ['Attack', 'Defense', 'Midfield', 'Set Pieces', 'Speed', 'Form']
+                      : (_selectedSport == 'kabaddi'
+                          ? ['Raiding', 'Defense', 'Raid Success', 'Tackle Success', 'Speed', 'Form']
+                          : ['Strike Rate', 'Average', 'Boundaries', 'Wickets', 'Economy', 'Form']);
                   return RadarChartTitle(
                     text: titles[index],
                     angle: 0,

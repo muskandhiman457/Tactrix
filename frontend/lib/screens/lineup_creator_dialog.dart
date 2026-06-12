@@ -68,23 +68,46 @@ class _LineupCreatorDialogState extends State<LineupCreatorDialog> {
 
     try {
       if (sport == 'Football') {
-        // Fetch matches by popular league to get competing teams
-        final response = await http.get(Uri.parse('${ApiConfig.baseUrl}/api/football/matches/by-league?leagueid=42')).timeout(const Duration(seconds: 5));
+        final response = await http.get(Uri.parse('${ApiConfig.baseUrl}/api/football/matches/live-and-upcoming')).timeout(const Duration(seconds: 5));
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
-          final matchesRaw = data['response']?['matches'] ?? data['matches'] ?? [];
-          final matches = matchesRaw is List ? matchesRaw : [];
+          final matches = data['matches'] is List ? data['matches'] : [];
           if (matches.isNotEmpty) {
             final m = matches[0];
-            final t1 = m['home']?['name'] ?? 'Real Madrid';
-            final t2 = m['away']?['name'] ?? 'Manchester City';
+            final matchId = m['id']?.toString() ?? m['matchId']?.toString();
+            final t1 = m['home']?['name'] ?? 'Home';
+            final t2 = m['away']?['name'] ?? 'Away';
             _matchName = '$t1 vs $t2';
-            _squadPool = _generateFootballSquad(t1, t2);
+
+            if (matchId != null) {
+              final scResponse = await http.get(Uri.parse('${ApiConfig.baseUrl}/api/football/match/$matchId/scorecard')).timeout(const Duration(seconds: 5));
+              if (scResponse.statusCode == 200) {
+                final scData = jsonDecode(scResponse.body);
+                final teams = scData['teams'] as Map<String, dynamic>?;
+                if (teams != null) {
+                  final List<Map<String, String>> fetchedPool = [];
+                  teams.forEach((teamName, teamData) {
+                    final playersList = teamData['players'] as List? ?? [];
+                    final shortName = teamData['short'] ?? teamName;
+                    for (var p in playersList) {
+                      final name = p['name'] ?? 'Unknown';
+                      final role = p['role'] ?? 'Player';
+                      fetchedPool.add({
+                        'name': name,
+                        'role': role,
+                        'team': shortName.toString(),
+                      });
+                    }
+                  });
+                  _squadPool = fetchedPool;
+                }
+              }
+            }
           }
         }
         if (_squadPool.isEmpty) {
-          _matchName = 'Real Madrid vs Manchester City';
-          _squadPool = _generateFootballSquad('Real Madrid', 'Manchester City');
+          _matchName = 'USA vs Mexico';
+          _squadPool = _generateFootballSquad('USA', 'Mexico');
         }
       } else {
         // Cricket or Kabaddi
@@ -159,7 +182,146 @@ class _LineupCreatorDialogState extends State<LineupCreatorDialog> {
     List<Map<String, String>> t1Players = [];
     List<Map<String, String>> t2Players = [];
 
-    if (t1Lower.contains('real madrid') || t1Lower.contains('madrid') || t1Lower.contains('rm')) {
+    final Map<String, List<Map<String, String>>> nationalTeams = {
+      'usa': [
+        {'name': 'Christian Pulisic', 'role': 'FWD', 'team': 'USA'},
+        {'name': 'Folarin Balogun', 'role': 'FWD', 'team': 'USA'},
+        {'name': 'Timothy Weah', 'role': 'FWD', 'team': 'USA'},
+        {'name': 'Weston McKennie', 'role': 'MID', 'team': 'USA'},
+        {'name': 'Tyler Adams', 'role': 'MID', 'team': 'USA'},
+        {'name': 'Yunus Musah', 'role': 'MID', 'team': 'USA'},
+        {'name': 'Antonee Robinson', 'role': 'DEF', 'team': 'USA'},
+        {'name': 'Tim Ream', 'role': 'DEF', 'team': 'USA'},
+        {'name': 'Chris Richards', 'role': 'DEF', 'team': 'USA'},
+        {'name': 'Sergiño Dest', 'role': 'DEF', 'team': 'USA'},
+        {'name': 'Matt Turner', 'role': 'GK', 'team': 'USA'},
+      ],
+      'mexico': [
+        {'name': 'Santiago Giménez', 'role': 'FWD', 'team': 'MEX'},
+        {'name': 'Hirving Lozano', 'role': 'FWD', 'team': 'MEX'},
+        {'name': 'Uriel Antuna', 'role': 'FWD', 'team': 'MEX'},
+        {'name': 'Edson Álvarez', 'role': 'MID', 'team': 'MEX'},
+        {'name': 'Luis Chávez', 'role': 'MID', 'team': 'MEX'},
+        {'name': 'Orbelín Pineda', 'role': 'MID', 'team': 'MEX'},
+        {'name': 'Jesús Gallardo', 'role': 'DEF', 'team': 'MEX'},
+        {'name': 'Johan Vásquez', 'role': 'DEF', 'team': 'MEX'},
+        {'name': 'César Montes', 'role': 'DEF', 'team': 'MEX'},
+        {'name': 'Jorge Sánchez', 'role': 'DEF', 'team': 'MEX'},
+        {'name': 'Guillermo Ochoa', 'role': 'GK', 'team': 'MEX'},
+      ],
+      'argentina': [
+        {'name': 'Lionel Messi', 'role': 'FWD', 'team': 'ARG'},
+        {'name': 'Lautaro Martínez', 'role': 'FWD', 'team': 'ARG'},
+        {'name': 'Julián Álvarez', 'role': 'FWD', 'team': 'ARG'},
+        {'name': 'Rodrigo De Paul', 'role': 'MID', 'team': 'ARG'},
+        {'name': 'Enzo Fernández', 'role': 'MID', 'team': 'ARG'},
+        {'name': 'Alexis Mac Allister', 'role': 'MID', 'team': 'ARG'},
+        {'name': 'Nicolás Tagliafico', 'role': 'DEF', 'team': 'ARG'},
+        {'name': 'Nicolás Otamendi', 'role': 'DEF', 'team': 'ARG'},
+        {'name': 'Cristian Romero', 'role': 'DEF', 'team': 'ARG'},
+        {'name': 'Nahuel Molina', 'role': 'DEF', 'team': 'ARG'},
+        {'name': 'Emiliano Martínez', 'role': 'GK', 'team': 'ARG'},
+      ],
+      'france': [
+        {'name': 'Kylian Mbappé', 'role': 'FWD', 'team': 'FRA'},
+        {'name': 'Antoine Griezmann', 'role': 'MID', 'team': 'FRA'},
+        {'name': 'Ousmane Dembélé', 'role': 'FWD', 'team': 'FRA'},
+        {'name': 'Bradley Barcola', 'role': 'FWD', 'team': 'FRA'},
+        {'name': 'N\'Golo Kanté', 'role': 'MID', 'team': 'FRA'},
+        {'name': 'Aurélien Tchouaméni', 'role': 'MID', 'team': 'FRA'},
+        {'name': 'Theo Hernández', 'role': 'DEF', 'team': 'FRA'},
+        {'name': 'William Saliba', 'role': 'DEF', 'team': 'FRA'},
+        {'name': 'Dayot Upamecano', 'role': 'DEF', 'team': 'FRA'},
+        {'name': 'Jules Koundé', 'role': 'DEF', 'team': 'FRA'},
+        {'name': 'Mike Maignan', 'role': 'GK', 'team': 'FRA'},
+      ],
+      'portugal': [
+        {'name': 'Cristiano Ronaldo', 'role': 'FWD', 'team': 'POR'},
+        {'name': 'Rafael Leão', 'role': 'FWD', 'team': 'POR'},
+        {'name': 'Bernardo Silva', 'role': 'FWD', 'team': 'POR'},
+        {'name': 'Bruno Fernandes', 'role': 'MID', 'team': 'POR'},
+        {'name': 'João Palhinha', 'role': 'MID', 'team': 'POR'},
+        {'name': 'João Neves', 'role': 'MID', 'team': 'POR'},
+        {'name': 'João Cancelo', 'role': 'DEF', 'team': 'POR'},
+        {'name': 'António Silva', 'role': 'DEF', 'team': 'POR'},
+        {'name': 'Rúben Dias', 'role': 'DEF', 'team': 'POR'},
+        {'name': 'Diogo Dalot', 'role': 'DEF', 'team': 'POR'},
+        {'name': 'Diogo Costa', 'role': 'GK', 'team': 'POR'},
+      ],
+      'spain': [
+        {'name': 'Lamine Yamal', 'role': 'FWD', 'team': 'ESP'},
+        {'name': 'Álvaro Morata', 'role': 'FWD', 'team': 'ESP'},
+        {'name': 'Nico Williams', 'role': 'FWD', 'team': 'ESP'},
+        {'name': 'Pedri', 'role': 'MID', 'team': 'ESP'},
+        {'name': 'Rodri', 'role': 'MID', 'team': 'ESP'},
+        {'name': 'Fabián Ruiz', 'role': 'MID', 'team': 'ESP'},
+        {'name': 'Marc Cucurella', 'role': 'DEF', 'team': 'ESP'},
+        {'name': 'Aymeric Laporte', 'role': 'DEF', 'team': 'ESP'},
+        {'name': 'Robin Le Normand', 'role': 'DEF', 'team': 'ESP'},
+        {'name': 'Dani Carvajal', 'role': 'DEF', 'team': 'ESP'},
+        {'name': 'Unai Simón', 'role': 'GK', 'team': 'ESP'},
+      ],
+      'brazil': [
+        {'name': 'Vinícius Júnior', 'role': 'FWD', 'team': 'BRA'},
+        {'name': 'Rodrygo', 'role': 'FWD', 'team': 'BRA'},
+        {'name': 'Raphinha', 'role': 'FWD', 'team': 'BRA'},
+        {'name': 'Lucas Paquetá', 'role': 'MID', 'team': 'BRA'},
+        {'name': 'João Gomes', 'role': 'MID', 'team': 'BRA'},
+        {'name': 'Bruno Guimarães', 'role': 'MID', 'team': 'BRA'},
+        {'name': 'Wendell', 'role': 'DEF', 'team': 'BRA'},
+        {'name': 'Gabriel Magalhães', 'role': 'DEF', 'team': 'BRA'},
+        {'name': 'Marquinhos', 'role': 'DEF', 'team': 'BRA'},
+        {'name': 'Danilo', 'role': 'DEF', 'team': 'BRA'},
+        {'name': 'Alisson Becker', 'role': 'GK', 'team': 'BRA'},
+      ],
+      'england': [
+        {'name': 'Harry Kane', 'role': 'FWD', 'team': 'ENG'},
+        {'name': 'Phil Foden', 'role': 'FWD', 'team': 'ENG'},
+        {'name': 'Bukayo Saka', 'role': 'FWD', 'team': 'ENG'},
+        {'name': 'Jude Bellingham', 'role': 'MID', 'team': 'ENG'},
+        {'name': 'Declan Rice', 'role': 'MID', 'team': 'ENG'},
+        {'name': 'Kobbie Mainoo', 'role': 'MID', 'team': 'ENG'},
+        {'name': 'Kieran Trippier', 'role': 'DEF', 'team': 'ENG'},
+        {'name': 'Marc Guéhi', 'role': 'DEF', 'team': 'ENG'},
+        {'name': 'John Stones', 'role': 'DEF', 'team': 'ENG'},
+        {'name': 'Kyle Walker', 'role': 'DEF', 'team': 'ENG'},
+        {'name': 'Jordan Pickford', 'role': 'GK', 'team': 'ENG'},
+      ],
+      'germany': [
+        {'name': 'Florian Wirtz', 'role': 'FWD', 'team': 'GER'},
+        {'name': 'Kai Havertz', 'role': 'FWD', 'team': 'GER'},
+        {'name': 'Jamal Musiala', 'role': 'FWD', 'team': 'GER'},
+        {'name': 'Ilkay Gündogan', 'role': 'MID', 'team': 'GER'},
+        {'name': 'Toni Kroos', 'role': 'MID', 'team': 'GER'},
+        {'name': 'Robert Andrich', 'role': 'MID', 'team': 'GER'},
+        {'name': 'Maximilian Mittelstädt', 'role': 'DEF', 'team': 'GER'},
+        {'name': 'Jonathan Tah', 'role': 'DEF', 'team': 'GER'},
+        {'name': 'Antonio Rüdiger', 'role': 'DEF', 'team': 'GER'},
+        {'name': 'Joshua Kimmich', 'role': 'DEF', 'team': 'GER'},
+        {'name': 'Manuel Neuer', 'role': 'GK', 'team': 'GER'},
+      ],
+      'japan': [
+        {'name': 'Ayase Ueda', 'role': 'FWD', 'team': 'JPN'},
+        {'name': 'Kaoru Mitoma', 'role': 'FWD', 'team': 'JPN'},
+        {'name': 'Takumi Minamino', 'role': 'FWD', 'team': 'JPN'},
+        {'name': 'Takefusa Kubo', 'role': 'FWD', 'team': 'JPN'},
+        {'name': 'Hidemasa Morita', 'role': 'MID', 'team': 'JPN'},
+        {'name': 'Wataru Endo', 'role': 'MID', 'team': 'JPN'},
+        {'name': 'Hiroki Ito', 'role': 'DEF', 'team': 'JPN'},
+        {'name': 'Koki Machida', 'role': 'DEF', 'team': 'JPN'},
+        {'name': 'Ko Itakura', 'role': 'DEF', 'team': 'JPN'},
+        {'name': 'Yukinari Sugawara', 'role': 'DEF', 'team': 'JPN'},
+        {'name': 'Zion Suzuki', 'role': 'GK', 'team': 'JPN'},
+      ],
+    };
+
+    final String key1 = nationalTeams.keys.firstWhere(
+      (k) => t1Lower.contains(k),
+      orElse: () => '',
+    );
+    if (key1.isNotEmpty) {
+      t1Players = nationalTeams[key1]!;
+    } else if (t1Lower.contains('real madrid') || t1Lower.contains('madrid') || t1Lower.contains('rm')) {
       t1Players = [
         {'name': 'T. Courtois', 'role': 'GK', 'team': 'RM'},
         {'name': 'D. Carvajal', 'role': 'DEF', 'team': 'RM'},
@@ -185,7 +347,13 @@ class _LineupCreatorDialogState extends State<LineupCreatorDialog> {
       ];
     }
 
-    if (t2Lower.contains('manchester city') || t2Lower.contains('city') || t2Lower.contains('mc')) {
+    final String key2 = nationalTeams.keys.firstWhere(
+      (k) => t2Lower.contains(k),
+      orElse: () => '',
+    );
+    if (key2.isNotEmpty) {
+      t2Players = nationalTeams[key2]!;
+    } else if (t2Lower.contains('manchester city') || t2Lower.contains('city') || t2Lower.contains('mc')) {
       t2Players = [
         {'name': 'Ederson', 'role': 'GK', 'team': 'MC'},
         {'name': 'M. Akanji', 'role': 'DEF', 'team': 'MC'},
@@ -250,8 +418,8 @@ class _LineupCreatorDialogState extends State<LineupCreatorDialog> {
         {'name': 'Mahender Singh', 'role': 'Defender', 'team': 'MUM'},
       ];
     } else {
-      _matchName = 'Real Madrid vs Manchester City (Upcoming)';
-      _squadPool = _generateFootballSquad('Real Madrid', 'Manchester City');
+      _matchName = 'USA vs Mexico (Upcoming)';
+      _squadPool = _generateFootballSquad('USA', 'Mexico');
     }
   }
 

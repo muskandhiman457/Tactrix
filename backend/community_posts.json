@@ -1,383 +1,373 @@
 [
   {
-    "id": "p_17_1781123050",
-    "name": "Alex Champion",
-    "handle": "@alex_champ",
-    "time": "Just now",
-    "content": "Check out this new poll and lineup!",
+    "id": "p_13_1781288569",
     "likes": 0,
-    "liked_by": [],
     "comments": [],
+    "badges": [],
+    "time": "Just now",
+    "handle": "@alex_champ",
+    "liked_by": [],
     "poll": {
-      "question": "Who will win?",
-      "options": [
-        "Team A",
-        "Team B"
-      ],
       "votes": [
         0,
         1
       ],
+      "options": [
+        "Team A",
+        "Team B"
+      ],
+      "question": "Who will win?",
       "userVotedIndex": 1
     },
+    "content": "Check out this new poll and lineup!",
     "lineup": {
-      "teamName": "Best 11",
-      "sport": "Football",
-      "formation": "4-3-3",
       "captain": "L. Messi",
-      "viceCaptain": "Rodri",
+      "formation": "4-3-3",
       "players": [
         "Messi",
         "Rodri"
-      ]
+      ],
+      "viceCaptain": "Rodri",
+      "sport": "Football",
+      "teamName": "Best 11"
     },
-    "badges": []
+    "name": "Alex Champion"
   },
   {
-    "id": "p_16_1781123050",
-    "name": "Alex Champion",
-    "handle": "@alex_champ",
-    "time": "Just now",
-    "content": "This is a new test post for verification!",
+    "id": "p_12_1781288561",
     "likes": 1,
+    "comments": [
+      {
+        "handle": "@alex_champ",
+        "id": "c1_1781288566.91626",
+        "content": "Adding a quick verification comment.",
+        "time": "Just now",
+        "name": "Alex Champion"
+      }
+    ],
+    "badges": [],
+    "time": "Just now",
+    "handle": "@alex_champ",
     "liked_by": [
       "@alex_champ"
     ],
-    "comments": [
-      {
-        "id": "c1_1781123050.287068",
-        "name": "Alex Champion",
-        "handle": "@alex_champ",
-        "content": "Adding a quick verification comment.",
-        "time": "Just now"
-      }
-    ],
     "poll": null,
+    "content": "This is a new test post for verification!",
     "lineup": null,
-    "badges": []
+    "name": "Alex Champion"
   },
   {
-    "id": "p_15_1780341727",
-    "name": "Muskan",
+    "id": "p_11_1781288345",
+    "likes": 0,
+    "comments": [],
+    "badges": [],
+    "time": "Just now",
+    "handle": "@alex_champ",
+    "liked_by": [],
+    "poll": {
+      "votes": [
+        0,
+        1
+      ],
+      "options": [
+        "Team A",
+        "Team B"
+      ],
+      "question": "Who will win?",
+      "userVotedIndex": 1
+    },
+    "content": "Check out this new poll and lineup!",
+    "lineup": {
+      "captain": "L. Messi",
+      "formation": "4-3-3",
+      "players": [
+        "Messi",
+        "Rodri"
+      ],
+      "viceCaptain": "Rodri",
+      "sport": "Football",
+      "teamName": "Best 11"
+    },
+    "name": "Alex Champion"
+  },
+  {
+    "id": "p_10_1781288336",
+    "likes": 1,
+    "comments": [
+      {
+        "handle": "@alex_champ",
+        "id": "c1_1781288343.102818",
+        "content": "Adding a quick verification comment.",
+        "time": "Just now",
+        "name": "Alex Champion"
+      }
+    ],
+    "badges": [],
+    "time": "Just now",
+    "handle": "@alex_champ",
+    "liked_by": [
+      "@alex_champ"
+    ],
+    "poll": null,
+    "content": "This is a new test post for verification!",
+    "lineup": null,
+    "name": "Alex Champion"
+  },
+  {
+    "id": "p_9_1781183407",
+    "likes": 0,
+    "comments": [],
+    "badges": [],
+    "time": "Just now",
     "handle": "@mikasa",
-    "time": "Just now",
-    "content": "today is the final of ipl",
-    "likes": 0,
     "liked_by": [],
-    "comments": [],
     "poll": {
-      "question": "who wins",
-      "options": [
-        "RCB",
-        "GI"
+      "votes": [
+        1,
+        0
       ],
+      "options": [
+        "india",
+        "pakistan"
+      ],
+      "question": "hows winnig",
+      "userVotedIndex": 0
+    },
+    "content": "woowww",
+    "lineup": {
+      "captain": "Tanzid Hasan Tamim",
+      "formation": "Balanced (1-4-2-4)",
+      "players": [
+        "Soumya Sarkar",
+        "Tanzid Hasan Tamim",
+        "Najmul Hossain Shanto",
+        "Mosaddek Hossain",
+        "Towhid Hridoy",
+        "Litton Das",
+        "Mehidy Hasan Miraz",
+        "Tanvir Islam",
+        "Taskin Ahmed",
+        "Mustafizur Rahman",
+        "Nahid Rana"
+      ],
+      "viceCaptain": "Soumya Sarkar",
+      "sport": "Cricket",
+      "teamName": "Dream Team XI"
+    },
+    "name": "Muskan"
+  },
+  {
+    "id": "p_8_1781183019",
+    "likes": 0,
+    "comments": [],
+    "badges": [],
+    "time": "Just now",
+    "handle": "@alex_champ",
+    "liked_by": [],
+    "poll": {
       "votes": [
         0,
         1
       ],
-      "userVotedIndex": 1
-    },
-    "lineup": null,
-    "badges": []
-  },
-  {
-    "id": "p_14_1780337943",
-    "name": "Alex Champion",
-    "handle": "@alex_champ",
-    "time": "Just now",
-    "content": "Check out this new poll and lineup!",
-    "likes": 0,
-    "liked_by": [],
-    "comments": [],
-    "poll": {
-      "question": "Who will win?",
       "options": [
         "Team A",
         "Team B"
       ],
-      "votes": [
-        0,
-        1
-      ],
-      "userVotedIndex": 1
-    },
-    "lineup": {
-      "teamName": "Best 11",
-      "sport": "Football",
-      "formation": "4-3-3",
-      "captain": "L. Messi",
-      "viceCaptain": "Rodri",
-      "players": [
-        "Messi",
-        "Rodri"
-      ]
-    },
-    "badges": []
-  },
-  {
-    "id": "p_13_1780337943",
-    "name": "Alex Champion",
-    "handle": "@alex_champ",
-    "time": "Just now",
-    "content": "This is a new test post for verification!",
-    "likes": 1,
-    "liked_by": [
-      "@alex_champ"
-    ],
-    "comments": [
-      {
-        "id": "c1_1780337943.593039",
-        "name": "Alex Champion",
-        "handle": "@alex_champ",
-        "content": "Adding a quick verification comment.",
-        "time": "Just now"
-      }
-    ],
-    "poll": null,
-    "lineup": null,
-    "badges": []
-  },
-  {
-    "id": "p_12_1780337315",
-    "name": "Alex Champion",
-    "handle": "@alex_champ",
-    "time": "Just now",
-    "content": "Check out this new poll and lineup!",
-    "likes": 0,
-    "liked_by": [],
-    "comments": [],
-    "poll": {
       "question": "Who will win?",
-      "options": [
-        "Team A",
-        "Team B"
-      ],
-      "votes": [
-        0,
-        1
-      ],
       "userVotedIndex": 1
     },
+    "content": "Check out this new poll and lineup!",
     "lineup": {
-      "teamName": "Best 11",
-      "sport": "Football",
-      "formation": "4-3-3",
       "captain": "L. Messi",
-      "viceCaptain": "Rodri",
+      "formation": "4-3-3",
       "players": [
         "Messi",
         "Rodri"
-      ]
-    }
+      ],
+      "viceCaptain": "Rodri",
+      "sport": "Football",
+      "teamName": "Best 11"
+    },
+    "name": "Alex Champion"
   },
   {
-    "id": "p_11_1780337315",
-    "name": "Alex Champion",
-    "handle": "@alex_champ",
-    "time": "Just now",
-    "content": "This is a new test post for verification!",
+    "id": "p_7_1781183004",
     "likes": 1,
-    "liked_by": [
-      "@alex_champ"
-    ],
     "comments": [
       {
-        "id": "c1_1780337315.167239",
-        "name": "Alex Champion",
         "handle": "@alex_champ",
+        "id": "c1_1781183012.5969",
+        "time": "Just now",
         "content": "Adding a quick verification comment.",
-        "time": "Just now"
+        "name": "Alex Champion"
       }
+    ],
+    "badges": [],
+    "time": "Just now",
+    "handle": "@alex_champ",
+    "liked_by": [
+      "@alex_champ"
     ],
     "poll": null,
-    "lineup": null
-  },
-  {
-    "id": "10",
-    "name": "Alex Champion",
-    "handle": "@alex_champ",
-    "time": "Just now",
     "content": "This is a new test post for verification!",
-    "likes": 1,
-    "liked_by": [
-      "@alex_champ"
-    ],
-    "comments": [
-      {
-        "id": "c1_1779988537.507151",
-        "name": "Alex Champion",
-        "handle": "@alex_champ",
-        "content": "Adding a quick verification comment.",
-        "time": "Just now"
-      }
-    ]
+    "lineup": null,
+    "name": "Alex Champion"
   },
   {
-    "id": "9",
-    "name": "Alex Champion",
-    "handle": "@alex_champ",
-    "time": "Just now",
-    "content": "This is a new test post for verification!",
-    "likes": 1,
-    "liked_by": [
-      "@alex_champ"
-    ],
-    "comments": [
-      {
-        "id": "c1_1779987794.465524",
-        "name": "Alex Champion",
-        "handle": "@alex_champ",
-        "content": "Adding a quick verification comment.",
-        "time": "Just now"
-      }
-    ]
-  },
-  {
-    "id": "8",
-    "name": "Alex Champion",
-    "handle": "@alex_champ",
-    "time": "Just now",
-    "content": "This is a new test post for verification!",
-    "likes": 1,
-    "liked_by": [
-      "@alex_champ"
-    ],
-    "comments": [
-      {
-        "id": "c1_1779916788.94244",
-        "name": "Alex Champion",
-        "handle": "@alex_champ",
-        "content": "Adding a quick verification comment.",
-        "time": "Just now"
-      }
-    ]
-  },
-  {
-    "id": "7",
-    "name": "Muskan",
-    "handle": "@mikasa",
-    "time": "Just now",
-    "content": "how the match today",
-    "likes": 1,
-    "liked_by": [
-      "@mikasa"
-    ],
-    "comments": [
-      {
-        "id": "c1_1779913584.596284",
-        "name": "Muskan",
-        "handle": "@mikasa",
-        "content": "what do you mean",
-        "time": "Just now"
-      }
-    ]
-  },
-  {
-    "id": "6",
-    "name": "Sports Fan",
-    "handle": "@sports_fan",
-    "time": "Just now",
-    "content": "wowww what a game",
+    "id": "p_6_1781181725",
     "likes": 0,
+    "comments": [],
+    "badges": [],
+    "time": "Just now",
+    "handle": "@render_test",
     "liked_by": [],
-    "comments": []
-  },
-  {
-    "id": "5",
-    "name": "Alex Champion",
-    "handle": "@alex_champ",
-    "time": "Just now",
-    "content": "This is a new test post for verification!",
-    "likes": 1,
-    "liked_by": [
-      "@alex_champ"
-    ],
-    "comments": [
-      {
-        "id": "c1_1779909377.79311",
-        "name": "Alex Champion",
-        "handle": "@alex_champ",
-        "content": "Adding a quick verification comment.",
-        "time": "Just now"
-      }
-    ]
-  },
-  {
-    "id": "4",
-    "name": "Alex Champion",
-    "handle": "@alex_champ",
-    "time": "Just now",
-    "content": "This is a new test post for verification!",
-    "likes": 1,
-    "liked_by": [
-      "@alex_champ"
-    ],
-    "comments": [
-      {
-        "id": "c1_1779904818.168869",
-        "name": "Alex Champion",
-        "handle": "@alex_champ",
-        "content": "Adding a quick verification comment.",
-        "time": "Just now"
-      }
-    ]
+    "poll": null,
+    "content": "This is a verification post to confirm the backend is live on the cloud! \ud83d\ude80",
+    "lineup": null,
+    "name": "Render Verifier"
   },
   {
     "id": "1",
-    "name": "Sarah Jenkins",
-    "handle": "@sjenkins_sports",
-    "time": "2h ago",
-    "content": "What an incredible IPL match! The comeback by CSK in the death overs was absolutely legendary. Dhoni's finishing style is timeless! \u26bd\ud83d\udd25 #IPL2026 #CSK",
     "likes": 124,
+    "comments": [
+      {
+        "handle": "@rohan_cricket",
+        "id": "c1",
+        "time": "1h ago",
+        "content": "Absolutely true! The Dhoni aura is unmatched.",
+        "name": "Rohan Sharma"
+      },
+      {
+        "handle": "@amit_p",
+        "id": "c2",
+        "time": "45m ago",
+        "content": "MI bowled poorly in the last 2 overs.",
+        "name": "Amit Patel"
+      }
+    ],
+    "badges": [
+      {
+        "description": "Top Predictor - Assigned for 75%+ accurate match predictions",
+        "badge_name": "Top Predictor",
+        "id": "top_predictor",
+        "assigned_at": "2026-06-01T12:00:00Z",
+        "badge_type": "performance",
+        "badge_icon_url": "https://img.icons8.com/color/48/star--v1.png"
+      }
+    ],
+    "time": "2h ago",
+    "handle": "@sjenkins_sports",
     "liked_by": [
       "@user1",
       "@user2"
     ],
-    "comments": [
+    "content": "What an incredible IPL match! The comeback by CSK in the death overs was absolutely legendary. Dhoni's finishing style is timeless! \u26bd\ud83d\udd25 #IPL2026 #CSK",
+    "name": "Sarah Jenkins"
+  },
+  {
+    "id": "poll_post",
+    "likes": 42,
+    "comments": [],
+    "badges": [
       {
-        "id": "c1",
-        "name": "Rohan Sharma",
-        "handle": "@rohan_cricket",
-        "content": "Absolutely true! The Dhoni aura is unmatched.",
-        "time": "1h ago"
-      },
-      {
-        "id": "c2",
-        "name": "Amit Patel",
-        "handle": "@amit_p",
-        "content": "MI bowled poorly in the last 2 overs.",
-        "time": "45m ago"
+        "description": "Top Predictor - Assigned for 75%+ accurate match predictions",
+        "badge_name": "Top Predictor",
+        "id": "top_predictor",
+        "assigned_at": "2026-06-01T12:00:00Z",
+        "badge_type": "performance",
+        "badge_icon_url": "https://img.icons8.com/color/48/star--v1.png"
       }
-    ]
+    ],
+    "time": "1h ago",
+    "handle": "@predictor_bot",
+    "liked_by": [],
+    "poll": {
+      "votes": [
+        146,
+        98,
+        54
+      ],
+      "options": [
+        "Virat Kohli",
+        "Shubman Gill",
+        "Rashid Khan"
+      ],
+      "question": "Who will score more fantasy points tonight?",
+      "userVotedIndex": 0
+    },
+    "content": "Who will score more fantasy points tonight in RCB vs GT? Vote now! \ud83d\udcca #RCBvGT",
+    "name": "Predictor Bot"
+  },
+  {
+    "id": "lineup_post",
+    "likes": 56,
+    "comments": [],
+    "badges": [
+      {
+        "description": "Super Chatter - Assigned for reaching high chat activity score",
+        "badge_name": "Super Chatter",
+        "id": "super_chatter",
+        "assigned_at": "2026-06-01T12:00:00Z",
+        "badge_type": "engagement",
+        "badge_icon_url": "https://img.icons8.com/color/48/chat--v1.png"
+      }
+    ],
+    "time": "3h ago",
+    "handle": "@pro_analyst",
+    "liked_by": [],
+    "content": "Here is my ultimate combination for the upcoming IPL match. The bowling lineup looks lethal. Let me know your thoughts! \ud83c\udfcf\ud83d\udd25 #DreamTeam #IPL2026",
+    "lineup": {
+      "captain": "Virat Kohli",
+      "formation": "Balanced (1-4-2-4)",
+      "players": [
+        "MS Dhoni (WK)",
+        "Virat Kohli",
+        "Rohit Sharma",
+        "Suryakumar Yadav",
+        "Shivam Dube",
+        "Hardik Pandya",
+        "Ravindra Jadeja",
+        "Jasprit Bumrah",
+        "Mohammed Siraj",
+        "Yash Dayal",
+        "Yuzvendra Chahal"
+      ],
+      "viceCaptain": "Jasprit Bumrah",
+      "sport": "Cricket",
+      "teamName": "Lethal Bowling XI"
+    },
+    "name": "Pro Analyst"
   },
   {
     "id": "2",
-    "name": "David Miller",
-    "handle": "@killer_miller",
-    "time": "4h ago",
-    "content": "Can we talk about Haaland's positioning? The guy is literally a magnet for the ball in the box. 35 goals in a single season is just ridiculous! \u26bd\ud83d\udc51 #ManCity #Haaland",
     "likes": 98,
+    "comments": [
+      {
+        "handle": "@johndoe_football",
+        "id": "c3",
+        "time": "3h ago",
+        "content": "Best striker in the world right now, no debate.",
+        "name": "John Doe"
+      }
+    ],
+    "badges": [],
+    "time": "4h ago",
+    "handle": "@killer_miller",
     "liked_by": [
       "@user3"
     ],
-    "comments": [
-      {
-        "id": "c3",
-        "name": "John Doe",
-        "handle": "@johndoe_football",
-        "content": "Best striker in the world right now, no debate.",
-        "time": "3h ago"
-      }
-    ]
+    "content": "Can we talk about Haaland's positioning? The guy is literally a magnet for the ball in the box. 35 goals in a single season is just ridiculous! \u26bd\ud83d\udc51 #ManCity #Haaland",
+    "name": "David Miller"
   },
   {
     "id": "3",
-    "name": "Pawan Kumar",
-    "handle": "@pawan_kabaddi",
-    "time": "6h ago",
-    "content": "That last raid in the Kabaddi finals was mindblowing. Speed, agility, and pure power. That is how champions play! \u26a1\ud83e\udd81 #Kabaddi #ProKabaddi",
     "likes": 76,
+    "comments": [],
+    "badges": [],
+    "time": "6h ago",
+    "handle": "@pawan_kabaddi",
     "liked_by": [],
-    "comments": []
+    "content": "That last raid in the Kabaddi finals was mindblowing. Speed, agility, and pure power. That is how champions play! \u26a1\ud83e\udd81 #Kabaddi #ProKabaddi",
+    "name": "Pawan Kumar"
   }
 ]

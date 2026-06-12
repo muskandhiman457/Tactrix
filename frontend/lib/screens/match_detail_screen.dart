@@ -441,13 +441,15 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
   }
 
   Future<void> _fetchScorecardIfNeeded() async {
-    if ((!widget.isCricket && !widget.isKabaddi) || widget.matchId == null) return;
+    if (widget.matchId == null) return;
     
     setState(() => _isLoadingScorecard = true);
     try {
       final path = widget.isCricket
           ? '/api/cricket/match/${widget.matchId}/scorecard'
-          : '/api/kabaddi/match/${widget.matchId}/scorecard';
+          : widget.isKabaddi
+              ? '/api/kabaddi/match/${widget.matchId}/scorecard'
+              : '/api/football/match/${widget.matchId}/scorecard';
       final response = await http.get(
         Uri.parse('${ApiConfig.baseUrl}$path'),
       );
@@ -1086,6 +1088,218 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
     );
   }
 
+  Widget _buildFootballLiveTrackerCard() {
+    if (_liveState == null) return const SizedBox.shrink();
+    
+    final possessionHome = _liveState!['possession']?['home'] ?? 50;
+    final possessionAway = _liveState!['possession']?['away'] ?? 50;
+    
+    final events = _liveState!['events'] as List<dynamic>? ?? [];
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF00FF7F).withValues(alpha: 0.3), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF00FF7F).withValues(alpha: 0.05),
+            blurRadius: 10,
+            spreadRadius: 1,
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'LIVE MATCH TRACKER',
+                style: GoogleFonts.outfit(
+                  color: const Color(0xFF00FF7F),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'LIVE',
+                  style: GoogleFonts.inter(
+                    color: Colors.redAccent,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Possession Section
+          Text(
+            'Ball Possession',
+            style: GoogleFonts.inter(
+              color: Colors.grey[400],
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '$possessionHome%',
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                '$possessionAway%',
+                style: GoogleFonts.outfit(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          // Custom split bar for possession
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: SizedBox(
+              height: 8,
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: possessionHome,
+                    child: Container(
+                      color: const Color(0xFF00FF7F),
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  Expanded(
+                    flex: possessionAway,
+                    child: Container(
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Events Timeline
+          if (events.isNotEmpty) ...[
+            Text(
+              'Key Events',
+              style: GoogleFonts.inter(
+                color: Colors.grey[400],
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: events.length,
+              itemBuilder: (context, index) {
+                final event = events[index];
+                final time = event['time'] ?? '';
+                final type = event['type'] ?? '';
+                final player = event['player'] ?? '';
+                final detail = event['detail'] ?? '';
+                final isHome = event['team'] == 'home';
+
+                IconData iconData = Icons.info;
+                Color iconColor = Colors.grey;
+
+                if (type == 'goal') {
+                  iconData = Icons.sports_soccer;
+                  iconColor = const Color(0xFF00FF7F);
+                } else if (type == 'yellow') {
+                  iconData = Icons.square;
+                  iconColor = Colors.yellow;
+                } else if (type == 'red') {
+                  iconData = Icons.square;
+                  iconColor = Colors.red;
+                } else if (type == 'sub') {
+                  iconData = Icons.swap_horiz;
+                  iconColor = Colors.orange;
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6.0),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 32,
+                        child: Text(
+                          time,
+                          style: GoogleFonts.inter(
+                            color: Colors.grey[500],
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Icon(iconData, size: 16, color: iconColor),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              player,
+                              style: GoogleFonts.inter(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                            if (detail.isNotEmpty)
+                              Text(
+                                detail,
+                                style: GoogleFonts.inter(
+                                  color: Colors.grey[500],
+                                  fontSize: 11,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        isHome ? 'Home' : 'Away',
+                        style: GoogleFonts.inter(
+                          color: isHome ? const Color(0xFF00FF7F) : Colors.blueAccent,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1114,6 +1328,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
             _buildScoreboard(),
             if (widget.isLive && widget.isCricket) _buildLiveTrackerCard(),
             if (widget.isLive && widget.isKabaddi) _buildKabaddiLiveTrackerCard(),
+            if (widget.isLive && !widget.isCricket && !widget.isKabaddi) _buildFootballLiveTrackerCard(),
             const SizedBox(height: 24),
             _buildTabBarLayout(context),
           ],
@@ -1624,28 +1839,28 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
         ],
       );
     } else {
-      // Generate deterministic football stats
-      final homePossession = 40 + (seed % 21); // 40% - 60%
-      final awayPossession = 100 - homePossession;
+      // Generate deterministic or dynamic football stats
+      final possessionHome = _liveState?['possession']?['home'] ?? (40 + (seed % 21)); // 40% - 60%
+      final awayPossession = 100 - possessionHome;
       
-      final homeShotsTarget = 2 + (seed % 8); // 2 - 9
-      final awayShotsTarget = 2 + ((seed ~/ 3) % 8); // 2 - 9
+      final homeShotsTarget = _liveState?['shotsOnTarget']?['home'] ?? (2 + (seed % 8)); // 2 - 9
+      final awayShotsTarget = _liveState?['shotsOnTarget']?['away'] ?? (2 + ((seed ~/ 3) % 8)); // 2 - 9
       
-      final homeTotalShots = homeShotsTarget + 2 + (seed % 10); // always >= shots on target
-      final awayTotalShots = awayShotsTarget + 2 + ((seed ~/ 2) % 10);
+      final homeTotalShots = _liveState?['shots']?['home'] ?? (homeShotsTarget + 2 + (seed % 10)); // always >= shots on target
+      final awayTotalShots = _liveState?['shots']?['away'] ?? (awayShotsTarget + 2 + ((seed ~/ 2) % 10));
       
-      final homeCorners = 2 + (seed % 8); // 2 - 9
-      final awayCorners = 2 + ((seed ~/ 4) % 8);
+      final homeCorners = _liveState?['corners']?['home'] ?? (2 + (seed % 8)); // 2 - 9
+      final awayCorners = _liveState?['corners']?['away'] ?? (2 + ((seed ~/ 4) % 8));
       
-      final homeFouls = 6 + (seed % 10); // 6 - 15
-      final awayFouls = 6 + ((seed ~/ 5) % 10);
+      final homeFouls = _liveState?['fouls']?['home'] ?? (6 + (seed % 10)); // 6 - 15
+      final awayFouls = _liveState?['fouls']?['away'] ?? (6 + ((seed ~/ 5) % 10));
 
       return ListView(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.all(20),
         children: [
-          _buildStatRow('Possession', homePossession.toDouble(), awayPossession.toDouble(), '$homePossession%', '$awayPossession%'),
+          _buildStatRow('Possession', possessionHome.toDouble(), awayPossession.toDouble(), '$possessionHome%', '$awayPossession%'),
           _buildStatRow('Shots on Target', homeShotsTarget.toDouble(), awayShotsTarget.toDouble(), homeShotsTarget.toString(), awayShotsTarget.toString()),
           _buildStatRow('Total Shots', homeTotalShots.toDouble(), awayTotalShots.toDouble(), homeTotalShots.toString(), awayTotalShots.toString()),
           _buildStatRow('Corners', homeCorners.toDouble(), awayCorners.toDouble(), homeCorners.toString(), awayCorners.toString()),

@@ -21,7 +21,12 @@ def predict_match_win(match_id: str):
         "99005": (51, 49, "DC is marginally ahead with Rishabh Pant back in form."),
         "88001": (64, 36, "Patna Pirates lead 28-26 with under 5 minutes remaining, giving them the defensive advantage."),
         "88002": (50, 50, "Jaipur Pink Panthers vs Bengaluru Bulls is expected to be an even raid-heavy battle."),
-        "88003": (45, 55, "Puneri Paltan's solid defensive wall is favored to contain Dabang Delhi's raiders.")
+        "88003": (45, 55, "Puneri Paltan's solid defensive wall is favored to contain Dabang Delhi's raiders."),
+        "77001": (54, 46, "USA holds a slight advantage (54% win probability) with Christian Pulisic leading the front line and a 2-1 lead in the 72nd minute."),
+        "77002": (52, 48, "Argentina is marginally favored in what is expected to be a legendary rematch, with Lionel Messi orchestrating the attack."),
+        "77003": (48, 52, "Spain is favored to win the possession battle, but Portugal's counter-attack led by Cristiano Ronaldo poses a massive threat."),
+        "77004": (51, 49, "Brazil is slightly ahead due to their flair and speed on the wings with Vinicius Jr, but England's solid midfield block can easily match them."),
+        "77005": (55, 45, "Germany is favored to control the game at home, but Japan's high-pressing discipline makes them dangerous on transition.")
     }
 
     if match_id in mapping:
@@ -59,7 +64,12 @@ def get_player_contribution(player_id: str):
         "suryakumar yadav": (9.4, [80, 82, 85, 90, 94]),
         "sudhakar m": (8.8, [65, 70, 78, 82, 88]),
         "guman singh": (8.9, [70, 75, 80, 84, 89]),
-        "arjun deshwal": (9.6, [88, 92, 90, 94, 96])
+        "arjun deshwal": (9.6, [88, 92, 90, 94, 96]),
+        "lionel messi": (9.9, [95, 96, 98, 97, 99]),
+        "kylian mbappé": (9.8, [92, 95, 96, 94, 98]),
+        "kylian mbappe": (9.8, [92, 95, 96, 94, 98]),
+        "cristiano ronaldo": (9.6, [88, 90, 92, 95, 96]),
+        "christian pulisic": (9.0, [80, 82, 85, 87, 90])
     }
 
     if player_name in profiles:

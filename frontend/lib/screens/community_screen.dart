@@ -178,7 +178,7 @@ class _LiveChatTabState extends State<LiveChatTab> with AutomaticKeepAliveClient
       final futures = [
         http.get(Uri.parse('${ApiConfig.baseUrl}/api/cricket/matches/live-and-upcoming')).timeout(const Duration(seconds: 5)),
         http.get(Uri.parse('${ApiConfig.baseUrl}/api/kabaddi/matches/live-and-upcoming')).timeout(const Duration(seconds: 5)),
-        http.get(Uri.parse('${ApiConfig.baseUrl}/api/football/matches/by-league?leagueid=42')).timeout(const Duration(seconds: 5)),
+        http.get(Uri.parse('${ApiConfig.baseUrl}/api/football/matches/live-and-upcoming')).timeout(const Duration(seconds: 5)),
       ];
 
       final responses = await Future.wait(futures);
@@ -242,12 +242,13 @@ class _LiveChatTabState extends State<LiveChatTab> with AutomaticKeepAliveClient
             final t2 = m['away']?['name'] ?? 'Away';
             final matchId = m['id']?.toString() ?? m['matchId']?.toString() ?? 'unknown';
             final notStarted = m['notStarted'] ?? false;
+            final tournamentName = m['tournamentName'] ?? 'FIFA World Cup 2026';
             rooms.add({
               'id': 'football_$matchId',
-              'name': '$t1 vs $t2 - UCL Match',
+              'name': '$t1 vs $t2 - $tournamentName',
               'sport': 'Football',
               'status': notStarted ? 'PREVIEW' : 'LIVE',
-              'details': statusObj['reason']?['long'] ?? 'Champions League Chat',
+              'details': statusObj['reason']?['long'] ?? '$tournamentName Discussion',
             });
           }
         }

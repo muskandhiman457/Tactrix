@@ -178,13 +178,15 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
   Future<void> _fetchFootballMatches() async {
     try {
       final response = await http.get(
-        Uri.parse('${ApiConfig.baseUrl}/api/football/matches/by-league?leagueid=42'),
+        Uri.parse('${ApiConfig.baseUrl}/api/football/matches/live-and-upcoming'),
       );
       if (!mounted) return;
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          if (data['response'] != null && data['response']['matches'] != null) {
+          if (data['matches'] != null) {
+            _footballMatches = data['matches'] is List ? data['matches'] : [];
+          } else if (data['response'] != null && data['response']['matches'] != null) {
             _footballMatches = data['response']['matches'];
           } else {
             _footballMatches = [];
@@ -686,6 +688,8 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
         final homeLogoUrl = homeTeamId != null ? 'https://images.fotmob.com/image_resources/logo/teamlogo/$homeTeamId.png' : null;
         final awayLogoUrl = awayTeamId != null ? 'https://images.fotmob.com/image_resources/logo/teamlogo/$awayTeamId.png' : null;
 
+        final tourneyName = match['tournamentName'] ?? 'Champions League';
+
         return GestureDetector(
           onTap: () {
             Navigator.push(
@@ -699,7 +703,10 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
                   statusText: statusText.toUpperCase(),
                   scoreText: isFinished ? '$homeScore - $awayScore' : (notStarted ? 'VS' : '$homeScore - $awayScore'),
                   isLive: !isFinished && !notStarted,
-                  venue: 'Champions League',
+                  venue: match['venue'] ?? tourneyName,
+                  isCricket: false,
+                  isKabaddi: false,
+                  matchId: match['id']?.toString(),
                 ),
               ),
             );
@@ -738,7 +745,7 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
                       ),
                     ),
                     Text(
-                      'Champions League',
+                      tourneyName,
                       style: GoogleFonts.inter(color: Colors.grey[500], fontSize: 10),
                     ),
                   ],
