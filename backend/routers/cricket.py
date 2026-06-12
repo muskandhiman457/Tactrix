@@ -228,6 +228,9 @@ def get_mock_scorecard(match_id: int) -> dict:
         99003: ("Sunrisers Hyderabad", "SRH", "Rajasthan Royals", "RR"),
         99004: ("Gujarat Titans", "GT", "Lucknow Super Giants", "LSG"),
         99005: ("Delhi Capitals", "DC", "Punjab Kings", "PBKS"),
+        99101: ("India", "IND", "Australia", "AUS"),
+        99102: ("England", "ENG", "India", "IND"),
+        99103: ("New Zealand", "NZ", "South Africa", "SA"),
     }
     if match_id not in mapping:
         return {"status": "error", "message": "Match not found", "teams": {}}
@@ -443,6 +446,111 @@ def get_mock_scorecard(match_id: int) -> dict:
                 {"name": "Harshal Patel", "role": "Bowler", "number": "83", "imageId": "14038", "nationality": "Indian", "stats": "Did Not Play"},
                 {"name": "Rahul Chahar", "role": "Bowler", "number": "2", "imageId": "14039", "nationality": "Indian", "stats": "Did Not Play"},
                 {"name": "Chris Woakes", "role": "All-Rounder", "number": "15", "imageId": "14040", "nationality": "English", "stats": "Did Not Play"}
+            ]
+        },
+        "IND": {
+            "playingXI": [
+                {"name": "Rohit Sharma", "role": "Batter", "number": "45", "imageId": "576", "nationality": "Indian", "stats": "Runs: 24, Balls: 38, Strike Rate: 63.2"},
+                {"name": "Yashasvi Jaiswal", "role": "Batter", "number": "64", "imageId": "14163", "nationality": "Indian", "stats": "Runs: 12, Balls: 22, Strike Rate: 54.5"},
+                {"name": "Shubman Gill", "role": "Batter", "number": "77", "imageId": "11808", "nationality": "Indian", "stats": "Runs: 45, Balls: 89, Strike Rate: 50.6"},
+                {"name": "Virat Kohli", "role": "Batter", "number": "18", "imageId": "1413", "nationality": "Indian", "stats": "Runs: 78, Balls: 142, Strike Rate: 54.9"},
+                {"name": "Rishabh Pant", "role": "Wicketkeeper", "number": "17", "imageId": "10744", "nationality": "Indian", "stats": "Runs: 45, Balls: 58, Strike Rate: 77.6"},
+                {"name": "KL Rahul", "role": "Batter", "number": "1", "imageId": "8733", "nationality": "Indian", "stats": "Runs: 15, Balls: 36, Strike Rate: 41.7"},
+                {"name": "Ravindra Jadeja", "role": "All-Rounder", "number": "8", "imageId": "587", "nationality": "Indian", "stats": "Runs: 30, Balls: 62, Strike Rate: 48.4"},
+                {"name": "Ravichandran Ashwin", "role": "All-Rounder", "number": "99", "imageId": "1563", "nationality": "Indian", "stats": "Overs: 24.0, Wickets: 3, Economy: 2.8"},
+                {"name": "Jasprit Bumrah", "role": "Bowler", "number": "93", "imageId": "9311", "nationality": "Indian", "stats": "Overs: 28.0, Wickets: 4, Economy: 2.1"},
+                {"name": "Mohammed Siraj", "role": "Bowler", "number": "73", "imageId": "10808", "nationality": "Indian", "stats": "Overs: 22.0, Wickets: 1, Economy: 3.2"},
+                {"name": "Akash Deep", "role": "Bowler", "number": "41", "imageId": "14165", "nationality": "Indian", "stats": "Overs: 18.0, Wickets: 2, Economy: 2.9"}
+            ],
+            "bench": [
+                {"name": "Axar Patel", "role": "All-Rounder", "number": "20", "imageId": "8725", "nationality": "Indian", "stats": "Did Not Play"},
+                {"name": "Dhruv Jurel", "role": "Wicketkeeper", "number": "16", "imageId": "14166", "nationality": "Indian", "stats": "Did Not Play"},
+                {"name": "Kuldeep Yadav", "role": "Bowler", "number": "23", "imageId": "9313", "nationality": "Indian", "stats": "Did Not Play"},
+                {"name": "Sarfaraz Khan", "role": "Batter", "number": "97", "imageId": "14167", "nationality": "Indian", "stats": "Did Not Play"}
+            ]
+        },
+        "AUS": {
+            "playingXI": [
+                {"name": "Usman Khawaja", "role": "Batter", "number": "18", "imageId": "1645", "nationality": "Australian", "stats": "Runs: 61, Balls: 120, Strike Rate: 50.8"},
+                {"name": "Steve Smith", "role": "Batter", "number": "49", "imageId": "1735", "nationality": "Australian", "stats": "Runs: 28, Balls: 54, Strike Rate: 51.9"},
+                {"name": "Marnus Labuschagne", "role": "Batter", "number": "33", "imageId": "11963", "nationality": "Australian", "stats": "Runs: 42, Balls: 98, Strike Rate: 42.9"},
+                {"name": "Travis Head", "role": "Batter", "number": "62", "imageId": "11964", "nationality": "Australian", "stats": "Runs: 89, Balls: 94, Strike Rate: 94.7"},
+                {"name": "Mitchell Marsh", "role": "All-Rounder", "number": "8", "imageId": "8293", "nationality": "Australian", "stats": "Runs: 15, Balls: 28, Strike Rate: 53.6"},
+                {"name": "Alex Carey", "role": "Wicketkeeper", "number": "4", "imageId": "11965", "nationality": "Australian", "stats": "Runs: 34, Balls: 45, Strike Rate: 75.6"},
+                {"name": "Pat Cummins", "role": "All-Rounder", "number": "30", "imageId": "8294", "nationality": "Australian", "stats": "Overs: 18.4, Wickets: 2, Economy: 2.9"},
+                {"name": "Mitchell Starc", "role": "Bowler", "number": "56", "imageId": "8295", "nationality": "Australian", "stats": "Overs: 24.0, Wickets: 2, Economy: 3.4"},
+                {"name": "Nathan Lyon", "role": "Bowler", "number": "67", "imageId": "8296", "nationality": "Australian", "stats": "Overs: 32.0, Wickets: 1, Economy: 2.7"},
+                {"name": "Josh Hazlewood", "role": "Bowler", "number": "38", "imageId": "8297", "nationality": "Australian", "stats": "Overs: 22.0, Wickets: 3, Economy: 2.4"},
+                {"name": "Scott Boland", "role": "Bowler", "number": "19", "imageId": "11966", "nationality": "Australian", "stats": "Overs: 15.0, Wickets: 1, Economy: 3.1"}
+            ],
+            "bench": [
+                {"name": "Matt Renshaw", "role": "Batter", "number": "12", "imageId": "11967", "nationality": "Australian", "stats": "Did Not Play"},
+                {"name": "Josh Inglis", "role": "Wicketkeeper", "number": "15", "imageId": "11968", "nationality": "Australian", "stats": "Did Not Play"},
+                {"name": "Cameron Green", "role": "All-Rounder", "number": "42", "imageId": "11782", "nationality": "Australian", "stats": "Did Not Play"},
+                {"name": "Todd Murphy", "role": "Bowler", "number": "21", "imageId": "11969", "nationality": "Australian", "stats": "Did Not Play"}
+            ]
+        },
+        "ENG": {
+            "playingXI": [
+                {"name": "Zak Crawley", "role": "Batter", "number": "14", "imageId": "12163", "nationality": "English", "stats": "Runs: 34, Balls: 40, Strike Rate: 85.0"},
+                {"name": "Ben Duckett", "role": "Batter", "number": "15", "imageId": "12164", "nationality": "English", "stats": "Runs: 45, Balls: 50, Strike Rate: 90.0"},
+                {"name": "Ollie Pope", "role": "Batter", "number": "22", "imageId": "12165", "nationality": "English", "stats": "Runs: 12, Balls: 18, Strike Rate: 66.7"},
+                {"name": "Joe Root", "role": "Batter", "number": "66", "imageId": "12166", "nationality": "English", "stats": "Runs: 88, Balls: 140, Strike Rate: 62.9"},
+                {"name": "Harry Brook", "role": "Batter", "number": "88", "imageId": "12167", "nationality": "English", "stats": "Runs: 54, Balls: 60, Strike Rate: 90.0"},
+                {"name": "Ben Stokes", "role": "All-Rounder", "number": "55", "imageId": "12168", "nationality": "English", "stats": "Runs: 28, Balls: 42, Strike Rate: 66.7"},
+                {"name": "Jamie Smith", "role": "Wicketkeeper", "number": "12", "imageId": "12169", "nationality": "English", "stats": "Runs: 20, Balls: 25, Strike Rate: 80.0"},
+                {"name": "Chris Woakes", "role": "All-Rounder", "number": "19", "imageId": "12170", "nationality": "English", "stats": "Overs: 18.0, Wickets: 2, Economy: 3.1"},
+                {"name": "Gus Atkinson", "role": "Bowler", "number": "21", "imageId": "12171", "nationality": "English", "stats": "Overs: 15.0, Wickets: 3, Economy: 3.5"},
+                {"name": "Shoaib Bashir", "role": "Bowler", "number": "33", "imageId": "12172", "nationality": "English", "stats": "Overs: 24.0, Wickets: 1, Economy: 3.8"},
+                {"name": "James Anderson", "role": "Bowler", "number": "9", "imageId": "12173", "nationality": "English", "stats": "Overs: 20.0, Wickets: 2, Economy: 2.5"}
+            ],
+            "bench": [
+                {"name": "Matthew Potts", "role": "Bowler", "number": "24", "imageId": "12174", "nationality": "English", "stats": "Did Not Play"},
+                {"name": "Dan Lawrence", "role": "Batter", "number": "25", "imageId": "12175", "nationality": "English", "stats": "Did Not Play"},
+                {"name": "Jack Leach", "role": "Bowler", "number": "26", "imageId": "12176", "nationality": "English", "stats": "Did Not Play"},
+                {"name": "Olly Stone", "role": "Bowler", "number": "27", "imageId": "12177", "nationality": "English", "stats": "Did Not Play"}
+            ]
+        },
+        "NZ": {
+            "playingXI": [
+                {"name": "Tom Latham", "role": "Batter", "number": "48", "imageId": "8363", "nationality": "New Zealander", "stats": "Runs: 28, Balls: 62, Strike Rate: 45.2"},
+                {"name": "Devon Conway", "role": "Batter", "number": "88", "imageId": "13635", "nationality": "New Zealander", "stats": "Runs: 42, Balls: 88, Strike Rate: 47.7"},
+                {"name": "Kane Williamson", "role": "Batter", "number": "22", "imageId": "1448", "nationality": "New Zealander", "stats": "Runs: 95, Balls: 180, Strike Rate: 52.8"},
+                {"name": "Rachin Ravindra", "role": "All-Rounder", "number": "8", "imageId": "13735", "nationality": "New Zealander", "stats": "Runs: 34, Balls: 54, Strike Rate: 63.0"},
+                {"name": "Daryl Mitchell", "role": "Batter", "number": "47", "imageId": "8364", "nationality": "New Zealander", "stats": "Runs: 18, Balls: 32, Strike Rate: 56.3"},
+                {"name": "Tom Blundell", "role": "Wicketkeeper", "number": "14", "imageId": "8365", "nationality": "New Zealander", "stats": "Runs: 12, Balls: 24, Strike Rate: 50.0"},
+                {"name": "Glenn Phillips", "role": "All-Rounder", "number": "87", "imageId": "8366", "nationality": "New Zealander", "stats": "Overs: 12.0, Wickets: 1, Economy: 3.2"},
+                {"name": "Mitchell Santner", "role": "All-Rounder", "number": "74", "imageId": "8683", "nationality": "New Zealander", "stats": "Overs: 24.0, Wickets: 2, Economy: 2.8"},
+                {"name": "Matt Henry", "role": "Bowler", "number": "44", "imageId": "8367", "nationality": "New Zealander", "stats": "Overs: 20.0, Wickets: 3, Economy: 3.0"},
+                {"name": "Tim Southee", "role": "Bowler", "number": "38", "imageId": "8368", "nationality": "New Zealander", "stats": "Overs: 18.0, Wickets: 1, Economy: 3.3"},
+                {"name": "William O'Rourke", "role": "Bowler", "number": "19", "imageId": "13636", "nationality": "New Zealander", "stats": "Overs: 14.0, Wickets: 2, Economy: 3.5"}
+            ],
+            "bench": [
+                {"name": "Will Young", "role": "Batter", "number": "12", "imageId": "8369", "nationality": "New Zealander", "stats": "Did Not Play"},
+                {"name": "Ish Sodhi", "role": "Bowler", "number": "15", "imageId": "8370", "nationality": "New Zealander", "stats": "Did Not Play"},
+                {"name": "Ajaz Patel", "role": "Bowler", "number": "21", "imageId": "8371", "nationality": "New Zealander", "stats": "Did Not Play"},
+                {"name": "Ben Sears", "role": "Bowler", "number": "25", "imageId": "13637", "nationality": "New Zealander", "stats": "Did Not Play"}
+            ]
+        },
+        "SA": {
+            "playingXI": [
+                {"name": "Aiden Markram", "role": "Batter", "number": "4", "imageId": "11163", "nationality": "South African", "stats": "Runs: 34, Balls: 50, Strike Rate: 68.0"},
+                {"name": "Tony de Zorzi", "role": "Batter", "number": "12", "imageId": "11164", "nationality": "South African", "stats": "Runs: 45, Balls: 90, Strike Rate: 50.0"},
+                {"name": "Tristan Stubbs", "role": "Batter", "number": "21", "imageId": "11165", "nationality": "South African", "stats": "Runs: 18, Balls: 28, Strike Rate: 64.3"},
+                {"name": "Temba Bavuma", "role": "Batter", "number": "10", "imageId": "11166", "nationality": "South African", "stats": "Runs: 54, Balls: 110, Strike Rate: 49.1"},
+                {"name": "David Bedingham", "role": "Batter", "number": "85", "imageId": "11167", "nationality": "South African", "stats": "Runs: 28, Balls: 48, Strike Rate: 58.3"},
+                {"name": "Kyle Verreynne", "role": "Wicketkeeper", "number": "44", "imageId": "11168", "nationality": "South African", "stats": "Runs: 15, Balls: 30, Strike Rate: 50.0"},
+                {"name": "Wiaan Mulder", "role": "All-Rounder", "number": "6", "imageId": "11169", "nationality": "South African", "stats": "Overs: 12.0, Wickets: 1, Economy: 3.1"},
+                {"name": "Keshav Maharaj", "role": "Bowler", "number": "16", "imageId": "11170", "nationality": "South African", "stats": "Overs: 28.0, Wickets: 2, Economy: 2.6"},
+                {"name": "Kagiso Rabada", "role": "Bowler", "number": "25", "imageId": "11171", "nationality": "South African", "stats": "Overs: 22.0, Wickets: 4, Economy: 2.9"},
+                {"name": "Anrich Nortje", "role": "Bowler", "number": "20", "imageId": "11172", "nationality": "South African", "stats": "Overs: 18.0, Wickets: 2, Economy: 3.5"},
+                {"name": "Lungi Ngidi", "role": "Bowler", "number": "22", "imageId": "11173", "nationality": "South African", "stats": "Overs: 15.0, Wickets: 1, Economy: 3.3"}
+            ],
+            "bench": [
+                {"name": "Ryan Rickelton", "role": "Wicketkeeper", "number": "23", "imageId": "11174", "nationality": "South African", "stats": "Did Not Play"},
+                {"name": "Nandre Burger", "role": "Bowler", "number": "24", "imageId": "11175", "nationality": "South African", "stats": "Did Not Play"},
+                {"name": "Dane Paterson", "role": "Bowler", "number": "26", "imageId": "11176", "nationality": "South African", "stats": "Did Not Play"},
+                {"name": "Senuran Muthusamy", "role": "All-Rounder", "number": "27", "imageId": "11177", "nationality": "South African", "stats": "Did Not Play"}
             ]
         }
     }
@@ -700,7 +808,7 @@ def get_match_scorecard(match_id: int):
     Returns parsed team players with name, role, and basic stats.
     """
     # Intercept mock matches
-    if match_id in (99001, 99002, 99003, 99004, 99005):
+    if match_id in (99001, 99002, 99003, 99004, 99005, 99101, 99102, 99103):
         return get_mock_scorecard(match_id)
 
     # 1. Try to fetch the team rosters (playing XI vs bench) from the Cricbuzz /teams endpoint

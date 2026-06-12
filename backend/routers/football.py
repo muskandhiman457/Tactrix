@@ -358,9 +358,34 @@ def search_football_players(search: str = "m"):
     
     try:
         response = requests.get(url, headers=headers, params=querystring, timeout=5)
-        return response.json()
-    except Exception as e:
-        return {"status": "error", "message": f"Request failed: {e}", "results": []}
+        if response.status_code == 200:
+            data = response.json()
+            if data.get("status") == "success" and data.get("results"):
+                return data
+    except Exception:
+        pass
+        
+    # Local fallback search over national teams rosters
+    search_lower = search.lower()
+    local_results = []
+    seen_names = set()
+    
+    for team_name, roster in WORLD_CUP_ROSTERS.items():
+        all_players = roster.get("playingXI", []) + roster.get("bench", [])
+        for p in all_players:
+            p_name = p.get("name", "")
+            if search_lower in p_name.lower():
+                if p_name not in seen_names:
+                    seen_names.add(p_name)
+                    local_results.append({
+                        "id": p.get("number", "10"),
+                        "name": p_name,
+                        "role": p.get("role", "FW"),
+                        "team": team_name,
+                        "nationality": p.get("nationality", team_name)
+                    })
+                    
+    return {"status": "success", "results": local_results[:20]}
 
 @router.get("/matches/live")
 def get_live_football_matches():
