@@ -1468,14 +1468,17 @@ class _SportsNewsTabState extends State<SportsNewsTab> with AutomaticKeepAliveCl
   Future<void> _launchArticleUrl(String urlString) async {
     if (urlString.isEmpty) return;
     try {
-      final url = Uri.parse(urlString);
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else {
-        debugPrint('Could not launch URL: $urlString');
-      }
+      final url = Uri.parse(urlString.trim());
+      await launchUrl(url, mode: LaunchMode.externalApplication);
     } catch (e) {
       debugPrint('Error launching news URL: $e');
+      // Fallback
+      try {
+        final url = Uri.parse(urlString.trim());
+        await launchUrl(url);
+      } catch (err) {
+        debugPrint('Fallback error launching news URL: $err');
+      }
     }
   }
 
