@@ -426,6 +426,7 @@ class _LineupCreatorDialogState extends State<LineupCreatorDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 24.0),
       backgroundColor: const Color(0xFF1E1E1E),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
@@ -529,6 +530,7 @@ class _LineupCreatorDialogState extends State<LineupCreatorDialog> {
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       key: ValueKey('formation_$_selectedFormation'),
                       initialValue: _selectedFormation,
                       dropdownColor: const Color(0xFF1E1E1E),
@@ -695,7 +697,7 @@ class _LineupCreatorDialogState extends State<LineupCreatorDialog> {
                       children: [
                         Expanded(
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Text(
                                 'CAPTAIN (C)',
@@ -703,9 +705,10 @@ class _LineupCreatorDialogState extends State<LineupCreatorDialog> {
                               ),
                               const SizedBox(height: 6),
                               DropdownButtonFormField<String>(
+                                isExpanded: true,
                                 key: ValueKey('captain_$_selectedCaptain'),
                                 initialValue: _selectedPlayers.contains(_selectedCaptain) ? _selectedCaptain : null,
-                                hint: Text('Select Captain', style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 12)),
+                                hint: Text('Select Captain', style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 12), overflow: TextOverflow.ellipsis, maxLines: 1),
                                 dropdownColor: const Color(0xFF1E1E1E),
                                 style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
                                 decoration: InputDecoration(
@@ -747,7 +750,7 @@ class _LineupCreatorDialogState extends State<LineupCreatorDialog> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Text(
                                 'VICE CAPTAIN (VC)',
@@ -755,9 +758,10 @@ class _LineupCreatorDialogState extends State<LineupCreatorDialog> {
                               ),
                               const SizedBox(height: 6),
                               DropdownButtonFormField<String>(
+                                isExpanded: true,
                                 key: ValueKey('vice_captain_$_selectedViceCaptain'),
                                 initialValue: _selectedPlayers.contains(_selectedViceCaptain) ? _selectedViceCaptain : null,
-                                hint: Text('Select Vice-Captain', style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 12)),
+                                hint: Text('Select Vice-Captain', style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 12), overflow: TextOverflow.ellipsis, maxLines: 1),
                                 dropdownColor: const Color(0xFF1E1E1E),
                                 style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
                                 decoration: InputDecoration(

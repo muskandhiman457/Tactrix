@@ -5,54 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../services/api_config.dart';
+import '../services/team_logo_helper.dart';
 import 'profile_screen.dart';
 import 'analysis_screen.dart';
 import 'community_screen.dart';
 import 'match_detail_screen.dart';
-
-String? getIplLogoAsset(String teamName) {
-  final name = teamName.toLowerCase().trim();
-  if (name.contains("chennai") || name.contains("super kings") || name.contains("csk")) {
-    return "assets/logos/csk logo.png";
-  } else if (name.contains("mumbai") || name == "mi" || name.contains("mumbai indians")) {
-    return "assets/logos/MI logo.jpg";
-  } else if (name.contains("royal challengers") || name.contains("rcb") || name.contains("bengaluru") || name.contains("bangalore")) {
-    return "assets/logos/RCB logo.jpg";
-  } else if (name.contains("kolkata") || name.contains("knight riders") || name.contains("kkr")) {
-    return "assets/logos/kkr logo.jpg";
-  } else if (name.contains("rajasthan") || name == "rr" || name.contains("rajasthan royals")) {
-    return "assets/logos/Rajasthan royal.jpg";
-  } else if (name.contains("delhi") || name == "dc" || name.contains("delhi capitals")) {
-    return "assets/logos/delhi capitals logo.png";
-  } else if (name.contains("punjab") || name.contains("kings xi") || name == "pbks" || name.contains("punjab kings")) {
-    return "assets/logos/Punjab kings logo.jpg";
-  } else if (name.contains("sunrisers") || name.contains("hyderabad") || name == "srh") {
-    return "assets/logos/sunrisers hyderabad logo.png";
-  } else if (name.contains("gujarat") || name == "gt" || name.contains("gujarat titans")) {
-    return "assets/logos/GT logo.png";
-  } else if (name.contains("lucknow") || name.contains("super giants") || name == "lsg") {
-    return "assets/logos/LSG logo.jpg";
-  }
-  return null;
-}
-
-String? getKabaddiLogoAsset(String teamName) {
-  final name = teamName.toLowerCase().trim();
-  if (name.contains("patna") || name.contains("pirates") || name == "pat") {
-    return "assets/logos/patna_pirates.png";
-  } else if (name.contains("mumba") || name == "mum") {
-    return "assets/logos/u_mumba.png";
-  } else if (name.contains("jaipur") || name.contains("panthers") || name == "jai") {
-    return "assets/logos/jaipur_pink_panthers.png";
-  } else if (name.contains("bengaluru") || name.contains("bulls") || name == "blr") {
-    return "assets/logos/bengaluru_bulls.png";
-  } else if (name.contains("delhi") || name.contains("dabang") || name == "del") {
-    return "assets/logos/dabang_delhi.png";
-  } else if (name.contains("puneri") || name.contains("paltan") || name == "pun") {
-    return "assets/logos/puneri_paltan.png";
-  }
-  return null;
-}
 
 
 class MainDashboard extends StatefulWidget {
@@ -485,6 +442,26 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
                           ),
                         );
                       }
+                      final flagUrl = getCountryFlagUrl(team1);
+                      if (flagUrl != null) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: Image.network(
+                            flagUrl,
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => CircleAvatar(
+                              radius: 14,
+                              backgroundColor: Colors.grey[800],
+                              child: Text(
+                                team1Short.isNotEmpty ? team1Short[0] : '?',
+                                style: GoogleFonts.inter(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        );
+                      }
                       return homeLogoUrl != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(14),
@@ -569,6 +546,26 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
                             width: 28,
                             height: 28,
                             fit: BoxFit.contain,
+                          ),
+                        );
+                      }
+                      final flagUrl = getCountryFlagUrl(team2);
+                      if (flagUrl != null) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: Image.network(
+                            flagUrl,
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => CircleAvatar(
+                              radius: 14,
+                              backgroundColor: Colors.grey[800],
+                              child: Text(
+                                team2Short.isNotEmpty ? team2Short[0] : '?',
+                                style: GoogleFonts.inter(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           ),
                         );
                       }
@@ -835,32 +832,54 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
                 // Home Team row
                 Row(
                   children: [
-                    homeLogoUrl != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(14),
-                            child: Image.network(
-                              homeLogoUrl,
-                              width: 28,
-                              height: 28,
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) => CircleAvatar(
-                                radius: 14,
-                                backgroundColor: Colors.grey[800],
-                                child: Text(
-                                  homeShort.isNotEmpty ? homeShort[0] : '?',
-                                  style: GoogleFonts.inter(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
-                                ),
+                    Builder(builder: (context) {
+                      final flagUrl = getCountryFlagUrl(homeTeam);
+                      if (flagUrl != null) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: Image.network(
+                            flagUrl,
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => CircleAvatar(
+                              radius: 14,
+                              backgroundColor: Colors.grey[800],
+                              child: Text(
+                                homeShort.isNotEmpty ? homeShort[0] : '?',
+                                style: GoogleFonts.inter(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
                               ),
                             ),
-                          )
-                        : CircleAvatar(
-                            radius: 14,
-                            backgroundColor: Colors.grey[800],
-                            child: Text(
-                              homeShort.isNotEmpty ? homeShort[0] : '?',
-                              style: GoogleFonts.inter(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
-                            ),
                           ),
+                        );
+                      }
+                      return homeLogoUrl != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: Image.network(
+                                homeLogoUrl,
+                                width: 28,
+                                height: 28,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => CircleAvatar(
+                                  radius: 14,
+                                  backgroundColor: Colors.grey[800],
+                                  child: Text(
+                                    homeShort.isNotEmpty ? homeShort[0] : '?',
+                                    style: GoogleFonts.inter(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : CircleAvatar(
+                              radius: 14,
+                              backgroundColor: Colors.grey[800],
+                              child: Text(
+                                homeShort.isNotEmpty ? homeShort[0] : '?',
+                                style: GoogleFonts.inter(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                            );
+                    }),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
@@ -908,32 +927,54 @@ class _HomeScreenPlaceholderState extends State<HomeScreenPlaceholder> {
                 // Away Team row
                 Row(
                   children: [
-                    awayLogoUrl != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(14),
-                            child: Image.network(
-                              awayLogoUrl,
-                              width: 28,
-                              height: 28,
-                              fit: BoxFit.contain,
-                              errorBuilder: (_, __, ___) => CircleAvatar(
-                                radius: 14,
-                                backgroundColor: Colors.grey[800],
-                                child: Text(
-                                  awayShort.isNotEmpty ? awayShort[0] : '?',
-                                  style: GoogleFonts.inter(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.bold),
-                                ),
+                    Builder(builder: (context) {
+                      final flagUrl = getCountryFlagUrl(awayTeam);
+                      if (flagUrl != null) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: Image.network(
+                            flagUrl,
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => CircleAvatar(
+                              radius: 14,
+                              backgroundColor: Colors.grey[800],
+                              child: Text(
+                                awayShort.isNotEmpty ? awayShort[0] : '?',
+                                style: GoogleFonts.inter(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.bold),
                               ),
                             ),
-                          )
-                        : CircleAvatar(
-                            radius: 14,
-                            backgroundColor: Colors.grey[800],
-                            child: Text(
-                              awayShort.isNotEmpty ? awayShort[0] : '?',
-                              style: GoogleFonts.inter(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.bold),
-                            ),
                           ),
+                        );
+                      }
+                      return awayLogoUrl != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: Image.network(
+                                awayLogoUrl,
+                                width: 28,
+                                height: 28,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => CircleAvatar(
+                                  radius: 14,
+                                  backgroundColor: Colors.grey[800],
+                                  child: Text(
+                                    awayShort.isNotEmpty ? awayShort[0] : '?',
+                                    style: GoogleFonts.inter(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : CircleAvatar(
+                              radius: 14,
+                              backgroundColor: Colors.grey[800],
+                              child: Text(
+                                awayShort.isNotEmpty ? awayShort[0] : '?',
+                                style: GoogleFonts.inter(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.bold),
+                              ),
+                            );
+                    }),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(

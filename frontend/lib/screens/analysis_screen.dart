@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:easy_localization/easy_localization.dart';
 import '../services/api_config.dart';
+import '../services/team_logo_helper.dart';
 import 'comparison_matrix_screen.dart';
 
 class AnalysisScreen extends StatefulWidget {
@@ -386,53 +387,6 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     if (_selectedPlayerB != null) _fetchPlayerContribution(_selectedPlayerB!, false);
   }
 
-  String? getIplLogoAsset(String teamName) {
-    final name = teamName.toLowerCase().trim();
-    if (name.contains('chennai') || name.contains('super kings') || name.contains('csk')) return 'assets/logos/csk logo.png';
-    if (name.contains('mumbai') || name.contains('mi') || name.contains('indians')) return 'assets/logos/MI logo.jpg';
-    if (name.contains('royal challengers') || name.contains('rcb') || name.contains('bengaluru') || name.contains('bangalore')) return 'assets/logos/RCB logo.jpg';
-    if (name.contains('kolkata') || name.contains('knight riders') || name.contains('kkr')) return 'assets/logos/kkr logo.jpg';
-    if (name.contains('rajasthan') || name.contains('rr') || name.contains('royals')) return 'assets/logos/Rajasthan royal.jpg';
-    if (name.contains('delhi') || name.contains('dc') || name.contains('capitals')) return 'assets/logos/delhi capitals logo.png';
-    if (name.contains('punjab') || name.contains('kings') || name.contains('pbks')) return 'assets/logos/Punjab kings logo.jpg';
-    if (name.contains('sunrisers') || name.contains('hyderabad') || name.contains('srh')) return 'assets/logos/sunrisers hyderabad logo.png';
-    if (name.contains('gujarat') || name.contains('gt') || name.contains('titans')) return 'assets/logos/GT logo.png';
-    if (name.contains('lucknow') || name.contains('super giants') || name.contains('lsg')) return 'assets/logos/LSG logo.jpg';
-    return null;
-  }
-
-  String? getKabaddiLogoAsset(String teamName) {
-    final name = teamName.toLowerCase().trim();
-    if (name.contains("patna") || name.contains("pirates") || name == "pat") {
-      return "assets/logos/patna_pirates.png";
-    } else if (name.contains("mumba") || name == "mum") {
-      return "assets/logos/u_mumba.png";
-    } else if (name.contains("jaipur") || name.contains("panthers") || name == "jai") {
-      return "assets/logos/jaipur_pink_panthers.png";
-    } else if (name.contains("bengaluru") || name.contains("bulls") || name == "blr") {
-      return "assets/logos/bengaluru_bulls.png";
-    } else if (name.contains("delhi") || name.contains("dabang") || name == "del") {
-      return "assets/logos/dabang_delhi.png";
-    } else if (name.contains("puneri") || name.contains("paltan") || name == "pun") {
-      return "assets/logos/puneri_paltan.png";
-    }
-    return null;
-  }
-
-  String? getFootballFlagLogoUrl(String teamName) {
-    final name = teamName.toLowerCase().trim();
-    if (name.contains('usa') || name.contains('united states')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/6095.png';
-    if (name.contains('mexico') || name.contains('mex')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/6088.png';
-    if (name.contains('argentina') || name.contains('arg')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/6320.png';
-    if (name.contains('france') || name.contains('fra')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/8244.png';
-    if (name.contains('portugal') || name.contains('por')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/9907.png';
-    if (name.contains('spain') || name.contains('esp')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/9906.png';
-    if (name.contains('brazil') || name.contains('bra')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/6321.png';
-    if (name.contains('england') || name.contains('eng')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/8498.png';
-    if (name.contains('germany') || name.contains('ger')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/8148.png';
-    if (name.contains('japan') || name.contains('jpn')) return 'https://images.fotmob.com/image_resources/logo/teamlogo/6175.png';
-    return null;
-  }
 
   List<Map<String, String>> _getPlayersForTeam(String teamName) {
     final cleaned = teamName.toLowerCase();
@@ -780,9 +734,20 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
   }
 
   Widget _buildTeamLogoAvatar(String teamName, double radius) {
+    if (_selectedSport == 'kabaddi') {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: Colors.grey[800],
+        child: Text(
+          teamName.isNotEmpty ? teamName[0].toUpperCase() : '?',
+          style: GoogleFonts.outfit(color: Colors.white, fontSize: radius, fontWeight: FontWeight.bold),
+        ),
+      );
+    }
+
     final iplAsset = getIplLogoAsset(teamName);
     final kabaddiAsset = getKabaddiLogoAsset(teamName);
-    final footballUrl = getFootballFlagLogoUrl(teamName);
+    final flagUrl = getCountryFlagUrl(teamName);
 
     if (iplAsset != null) {
       return CircleAvatar(
@@ -806,13 +771,13 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
       );
     }
 
-    if (footballUrl != null) {
+    if (flagUrl != null) {
       return CircleAvatar(
         radius: radius,
         backgroundColor: Colors.transparent,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(radius),
-          child: Image.network(footballUrl, fit: BoxFit.contain, width: radius * 2, height: radius * 2),
+          child: Image.network(flagUrl, fit: BoxFit.cover, width: radius * 2, height: radius * 2),
         ),
       );
     }

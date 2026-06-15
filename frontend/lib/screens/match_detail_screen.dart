@@ -4,50 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import '../services/api_config.dart';
-
-String? getIplLogoAsset(String teamName) {
-  final name = teamName.toLowerCase().trim();
-  if (name.contains("chennai") || name.contains("super kings") || name.contains("csk")) {
-    return "assets/logos/csk logo.png";
-  } else if (name.contains("mumbai") || name == "mi" || name.contains("mumbai indians")) {
-    return "assets/logos/MI logo.jpg";
-  } else if (name.contains("royal challengers") || name.contains("rcb") || name.contains("bengaluru") || name.contains("bangalore")) {
-    return "assets/logos/RCB logo.jpg";
-  } else if (name.contains("kolkata") || name.contains("knight riders") || name.contains("kkr")) {
-    return "assets/logos/kkr logo.jpg";
-  } else if (name.contains("rajasthan") || name == "rr" || name.contains("rajasthan royals")) {
-    return "assets/logos/Rajasthan royal.jpg";
-  } else if (name.contains("delhi") || name == "dc" || name.contains("delhi capitals")) {
-    return "assets/logos/delhi capitals logo.png";
-  } else if (name.contains("punjab") || name.contains("kings xi") || name == "pbks" || name.contains("punjab kings")) {
-    return "assets/logos/Punjab kings logo.jpg";
-  } else if (name.contains("sunrisers") || name.contains("hyderabad") || name == "srh") {
-    return "assets/logos/sunrisers hyderabad logo.png";
-  } else if (name.contains("gujarat") || name == "gt" || name.contains("gujarat titans")) {
-    return "assets/logos/GT logo.png";
-  } else if (name.contains("lucknow") || name.contains("super giants") || name == "lsg") {
-    return "assets/logos/LSG logo.jpg";
-  }
-  return null;
-}
-
-String? getKabaddiLogoAsset(String teamName) {
-  final name = teamName.toLowerCase().trim();
-  if (name.contains("patna") || name.contains("pirates") || name == "pat") {
-    return "assets/logos/patna_pirates.png";
-  } else if (name.contains("mumba") || name == "mum") {
-    return "assets/logos/u_mumba.png";
-  } else if (name.contains("jaipur") || name.contains("panthers") || name == "jai") {
-    return "assets/logos/jaipur_pink_panthers.png";
-  } else if (name.contains("bengaluru") || name.contains("bulls") || name == "blr") {
-    return "assets/logos/bengaluru_bulls.png";
-  } else if (name.contains("delhi") || name.contains("dabang") || name == "del") {
-    return "assets/logos/dabang_delhi.png";
-  } else if (name.contains("puneri") || name.contains("paltan") || name == "pun") {
-    return "assets/logos/puneri_paltan.png";
-  }
-  return null;
-}
+import '../services/team_logo_helper.dart';
 
 class PlayerInfo {
   final String name;
@@ -1510,6 +1467,7 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
     final iplAsset = getIplLogoAsset(name);
     final kabaddiAsset = getKabaddiLogoAsset(name);
     final logoAsset = iplAsset ?? kabaddiAsset;
+    final flagUrl = getCountryFlagUrl(name);
     return Column(
       children: [
         CircleAvatar(
@@ -1533,14 +1491,14 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                     ),
                   ),
                 )
-              : (logoUrl != null
+              : (flagUrl != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(35),
                       child: Image.network(
-                        logoUrl,
+                        flagUrl,
                         width: 70,
                         height: 70,
-                        fit: BoxFit.contain,
+                        fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Text(
                           shortName.toUpperCase(),
                           style: GoogleFonts.outfit(
@@ -1551,14 +1509,32 @@ class _MatchDetailScreenState extends State<MatchDetailScreen> {
                         ),
                       ),
                     )
-                  : Text(
-                      shortName.toUpperCase(),
-                      style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    )),
+                  : (logoUrl != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(35),
+                          child: Image.network(
+                            logoUrl,
+                            width: 70,
+                            height: 70,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => Text(
+                              shortName.toUpperCase(),
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Text(
+                          shortName.toUpperCase(),
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ))),
         ),
         const SizedBox(height: 12),
         SizedBox(

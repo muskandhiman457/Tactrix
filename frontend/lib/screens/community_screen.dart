@@ -971,6 +971,7 @@ class _CommunityFeedTabState extends State<CommunityFeedTab> with AutomaticKeepA
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return Dialog(
+              insetPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 24.0),
               backgroundColor: const Color(0xFF1E1E1E),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: Container(
