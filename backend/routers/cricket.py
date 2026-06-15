@@ -1,5 +1,6 @@
 import os
 import requests
+import time
 from fastapi import APIRouter, Response
 from fastapi.responses import FileResponse
 from typing import List, Dict
@@ -9,10 +10,73 @@ router = APIRouter(
     tags=["Cricket"]
 )
 
-RAPIDAPI_HEADERS = {
-    "x-rapidapi-host": "cricbuzz-cricket2.p.rapidapi.com",
-    "x-rapidapi-key": "a5eac63245mshc1a65cb950faebfp1c7d8ajsnc48adb31d3ee"
-}
+# Global in-memory cache
+_CRICKET_CACHE = {}
+
+def get_rapidapi_headers():
+    return {
+        "x-rapidapi-host": "cricbuzz-cricket2.p.rapidapi.com",
+        "x-rapidapi-key": os.getenv("RAPIDAPI_KEY", "a5eac63245mshc1a65cb950faebfp1c7d8ajsnc48adb31d3ee")
+    }
+
+def _fetch_cricbuzz_live_raw() -> dict:
+    cached_val = _CRICKET_CACHE.get("live_raw")
+    if cached_val:
+        data, timestamp = cached_val
+        if time.time() - timestamp < 300:  # 5 minutes cache
+            return data
+
+    try:
+        response = requests.get(
+            "https://cricbuzz-cricket2.p.rapidapi.com/matches/v1/live",
+            headers=get_rapidapi_headers(),
+            timeout=10
+        )
+        if response.status_code == 200:
+            data = response.json()
+            if "typeMatches" in data:
+                _CRICKET_CACHE["live_raw"] = (data, time.time())
+                return data
+            else:
+                raise Exception("API response missing 'typeMatches'")
+        else:
+            raise Exception(f"Status code {response.status_code}")
+    except Exception as e:
+        print(f"Error fetching live matches from Cricbuzz: {e}")
+        if cached_val:
+            print("Using stale cache for live matches.")
+            return cached_val[0]
+        raise e
+
+def _fetch_cricbuzz_upcoming_raw() -> dict:
+    cached_val = _CRICKET_CACHE.get("upcoming_raw")
+    if cached_val:
+        data, timestamp = cached_val
+        if time.time() - timestamp < 900:  # 15 minutes cache
+            return data
+
+    try:
+        response = requests.get(
+            "https://cricbuzz-cricket2.p.rapidapi.com/matches/v1/upcoming",
+            headers=get_rapidapi_headers(),
+            timeout=10
+        )
+        if response.status_code == 200:
+            data = response.json()
+            if "typeMatches" in data:
+                _CRICKET_CACHE["upcoming_raw"] = (data, time.time())
+                return data
+            else:
+                raise Exception("API response missing 'typeMatches'")
+        else:
+            raise Exception(f"Status code {response.status_code}")
+    except Exception as e:
+        print(f"Error fetching upcoming matches from Cricbuzz: {e}")
+        if cached_val:
+            print("Using stale cache for upcoming matches.")
+            return cached_val[0]
+        raise e
+
 
 
 def _extract_matches(data: dict) -> list:
@@ -644,34 +708,24 @@ def get_live_and_upcoming_cricket_matches():
 
     # Fetch LIVE matches
     try:
-        live_resp = requests.get(
-            "https://cricbuzz-cricket2.p.rapidapi.com/matches/v1/live",
-            headers=RAPIDAPI_HEADERS,
-            timeout=10
-        )
-        live_data = live_resp.json()
+        live_data = _fetch_cricbuzz_live_raw()
         for m in _extract_matches(live_data):
             state = m.get("matchInfo", {}).get("state", "")
             if state.lower() != "complete":
                 all_matches.append(m)
     except Exception as e:
-        print(f"Error fetching live matches: {e}")
+        print(f"Error fetching live matches in endpoint: {e}")
 
     # Fetch UPCOMING matches
     try:
-        upcoming_resp = requests.get(
-            "https://cricbuzz-cricket2.p.rapidapi.com/matches/v1/upcoming",
-            headers=RAPIDAPI_HEADERS,
-            timeout=10
-        )
-        upcoming_data = upcoming_resp.json()
+        upcoming_data = _fetch_cricbuzz_upcoming_raw()
         for m in _extract_matches(upcoming_data):
             state = m.get("matchInfo", {}).get("state", "")
             # Only include Preview (upcoming) - not Complete
             if state.lower() not in ("complete",):
                 all_matches.append(m)
     except Exception as e:
-        print(f"Error fetching upcoming matches: {e}")
+        print(f"Error fetching upcoming matches in endpoint: {e}")
 
     # Keep IPL and international/ODI/TEST matches
     filtered_matches = [m for m in all_matches if is_allowed_match(m)]
@@ -687,12 +741,7 @@ def get_live_and_upcoming_cricket_matches():
 def get_live_cricket_matches():
     """Legacy live-only endpoint. ONLY returns TEST matches."""
     try:
-        response = requests.get(
-            "https://cricbuzz-cricket2.p.rapidapi.com/matches/v1/live",
-            headers=RAPIDAPI_HEADERS,
-            timeout=10
-        )
-        data = response.json()
+        data = _fetch_cricbuzz_live_raw()
         matches = [
             m for m in _extract_matches(data)
             if m.get("matchInfo", {}).get("state", "").lower() != "complete"
@@ -712,12 +761,7 @@ def get_live_cricket_matches():
 def get_upcoming_cricket_matches():
     """Legacy upcoming-only endpoint. ONLY returns TEST matches."""
     try:
-        response = requests.get(
-            "https://cricbuzz-cricket2.p.rapidapi.com/matches/v1/upcoming",
-            headers=RAPIDAPI_HEADERS,
-            timeout=10
-        )
-        data = response.json()
+        data = _fetch_cricbuzz_upcoming_raw()
         matches = [
             m for m in _extract_matches(data)
             if m.get("matchInfo", {}).get("state", "").lower() == "preview"
@@ -801,22 +845,13 @@ def get_player_image(player_id: int):
     return Response(status_code=404)
 
 
-@router.get("/match/{match_id}/scorecard")
-def get_match_scorecard(match_id: int):
-    """
-    Fetches the scorecard for a given matchId from Cricbuzz.
-    Returns parsed team players with name, role, and basic stats.
-    """
-    # Intercept mock matches
-    if match_id in (99001, 99002, 99003, 99004, 99005, 99101, 99102, 99103):
-        return get_mock_scorecard(match_id)
-
+def _do_fetch_and_parse_scorecard(match_id: int):
     # 1. Try to fetch the team rosters (playing XI vs bench) from the Cricbuzz /teams endpoint
     teams_roster = {}
     try:
         teams_resp = requests.get(
             f"https://cricbuzz-cricket2.p.rapidapi.com/mcenter/v1/{match_id}/teams",
-            headers=RAPIDAPI_HEADERS,
+            headers=get_rapidapi_headers(),
             timeout=10
         )
         if teams_resp.status_code == 200:
@@ -864,7 +899,7 @@ def get_match_scorecard(match_id: int):
     try:
         scard_resp = requests.get(
             f"https://cricbuzz-cricket2.p.rapidapi.com/mcenter/v1/{match_id}/scard",
-            headers=RAPIDAPI_HEADERS,
+            headers=get_rapidapi_headers(),
             timeout=10
         )
         if scard_resp.status_code == 200:
@@ -961,3 +996,36 @@ def get_match_scorecard(match_id: int):
             return {"status": "error", "message": str(e), "teams": {}}
 
     return {"status": "error", "message": "Failed to fetch match details or squads are empty", "teams": {}}
+
+
+@router.get("/match/{match_id}/scorecard")
+def get_match_scorecard(match_id: int):
+    """
+    Fetches the scorecard for a given matchId from Cricbuzz.
+    Returns parsed team players with name, role, and basic stats.
+    """
+    # Intercept mock matches
+    if match_id in (99001, 99002, 99003, 99004, 99005, 99101, 99102, 99103):
+        return get_mock_scorecard(match_id)
+
+    # Check cache first
+    cache_key = f"scorecard_{match_id}"
+    cached_val = _CRICKET_CACHE.get(cache_key)
+    if cached_val:
+        data, timestamp = cached_val
+        if time.time() - timestamp < 60:  # 1 minute cache
+            return data
+
+    try:
+        result = _do_fetch_and_parse_scorecard(match_id)
+        if result.get("status") == "success":
+            _CRICKET_CACHE[cache_key] = (result, time.time())
+            return result
+        else:
+            raise Exception(result.get("message", "API returned error"))
+    except Exception as e:
+        print(f"Error fetching live scorecard for match {match_id}: {e}")
+        if cached_val:
+            print(f"Using stale cache for scorecard of match {match_id}")
+            return cached_val[0]
+        return {"status": "error", "message": f"Failed to fetch match details: {str(e)}", "teams": {}}
